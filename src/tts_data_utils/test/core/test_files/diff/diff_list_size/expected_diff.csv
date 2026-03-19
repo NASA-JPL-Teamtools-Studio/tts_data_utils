@@ -1,0 +1,33 @@
+Key,Same,Type,Left,Right
+/EVR Container/name,True,str,EVR Container,EVR Container
+/EVR Container/_repr_cols,True,list,Same memory location,Same memory location
+/EVR Container/_csv_cols,True,list,Same memory location,Same memory location
+/EVR Container/_repr_filters,True,list,Same memory location,Same memory location
+/EVR Container/records,False,list,List size differs (635),List size differs (636)
+/EVR Container/metadata,True,NoneType,Same memory location,Same memory location
+/EVR Container/history/EVR Container/name,True,str,evrs,evrs
+/EVR Container/history/EVR Container/_repr_cols/0,True,str,Action,Action
+/EVR Container/history/EVR Container/_repr_cols/1,True,str,Description,Description
+/EVR Container/history/EVR Container/_repr_cols/2,True,str,Starting Count,Starting Count
+/EVR Container/history/EVR Container/_repr_cols/3,True,str,Ending Count,Ending Count
+/EVR Container/history/EVR Container/_repr_cols/4,True,str,Percent Remaining,Percent Remaining
+/EVR Container/history/EVR Container/_repr_cols,True,list,Children All Same,Children All Same
+/EVR Container/history/EVR Container/_csv_cols/0,True,str,Action,Action
+/EVR Container/history/EVR Container/_csv_cols/1,True,str,Description,Description
+/EVR Container/history/EVR Container/_csv_cols/2,True,str,Ending Count,Ending Count
+/EVR Container/history/EVR Container/_csv_cols/3,True,str,Starting Count,Starting Count
+/EVR Container/history/EVR Container/_csv_cols/4,True,str,Percent Remaining,Percent Remaining
+/EVR Container/history/EVR Container/_csv_cols,True,list,Children All Same,Children All Same
+/EVR Container/history/EVR Container/_repr_filters,True,list,Children All Same,Children All Same
+/EVR Container/history/EVR Container/records,False,list,List size differs (2),List size differs (1)
+/EVR Container/history/EVR Container/metadata,True,NoneType,Same memory location,Same memory location
+/EVR Container/history/EVR Container/history,True,NoneType,Same memory location,Same memory location
+/EVR Container/history/EVR Container/_bypass_validation,True,bool,False,False
+/EVR Container/history/EVR Container/_sub_container,True,bool,False,False
+/EVR Container/history/EVR Container,False,dict,Keys with diffs: records,Keys with diffs: records
+/EVR Container/history,False,DataContainerHistoryContainer,See children,See children
+/EVR Container/_bypass_validation,True,bool,False,False
+/EVR Container/_sub_container,True,bool,False,False
+/EVR Container/_default_time_label,True,str,scet,scet
+/EVR Container,False,dict,"Keys with diffs: records, history","Keys with diffs: records, history"
+/,False,EvrContainer,See children,See children

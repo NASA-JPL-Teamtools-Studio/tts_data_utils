@@ -1,0 +1,30 @@
+DataUtil should be a library that manages creation of data containers and their associated data items.
+
+Data containers should be able to be made from raw inputs and/or other data containers.
+
+Data containers should be able to fail gracefully if something goes wrong in their instantiation.
+
+Data containers should fail gracefully if one of their inputs failed gracefully
+
+Items downstream of data containers should understand when their containers have failed and act accordingly. This means in DEXTER, TOWER, and DANTE.
+
+Data containers should also have the ability to fail softly. This means that some requirement may not be met, but the container should be allowed to proceed in a way that may be degraded. Data containers that have failed softly (e.g. an EVR container when there are EVR gaps) should be sufficiently noisy that any downstream analysis is alerted to their failure. Whatever final reporting layer exists (Cacher?) should be able to easily assess all tools that use DataUtil data containers and report on success, failure, and partial (e.g. soft) failure.
+
+Data containers should also allow the transport of pointers to objects that may be needed in many places, but we will only want to write once (e.g. XML dictionary objects that are needed in DTAT or DEXTER should enter via pointers in the data containers created in the Interface module)
+
+
+ChillDataObject already exists, but is really just a light wrapper around DotWiz that only adds an html repr
+
+ChillRecords is similar, but for groups of records instead of individuals
+
+DataContainer should have:
+    Filter methods
+    Colorization method using filter lambdas
+    Mission-wide color globals
+    Time parsing/formatting methods
+
+DataItem should have
+    Time format definition
+
+
+
