@@ -1,0 +1,14 @@
+docxtpl
+pandas
+pytest
+tabulate
+jinja2
+plotly
+jpl_time
+openpyxl
+datetime
+jpl-time
+tabulate
+pandas
+tts-utilities<1.0.0,>=0.2.1
+tts-html-utils<1.0.0,>=0.4.2

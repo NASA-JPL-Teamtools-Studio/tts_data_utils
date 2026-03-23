@@ -1,0 +1,1869 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tts_data_utils.core &mdash; tts-data-utils 0.7.3.dev0+g8908e76e7.d20260323 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/bugfix.css?v=aa86f000" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=f4eecffc"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="tts_data_utils.invulnerable_data_manager" href="tts_data_utils.invulnerable_data_manager.html" />
+    <link rel="prev" title="tts_data_utils" href="tts_data_utils.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            tts-data-utils
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="tts_data_utils.html">tts_data_utils</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="tts_data_utils.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">tts_data_utils.core</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tts_data_utils.invulnerable_data_manager.html">tts_data_utils.invulnerable_data_manager</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tts_data_utils.multimission.html">tts_data_utils.multimission</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="tts_data_utils.html#submodules">Submodules</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">tts-data-utils</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="tts_data_utils.html">tts_data_utils</a></li>
+      <li class="breadcrumb-item active">tts_data_utils.core</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-tts_data_utils.core">
+<span id="tts-data-utils-core"></span><h1>tts_data_utils.core<a class="headerlink" href="#module-tts_data_utils.core" title="Link to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+<section id="module-tts_data_utils.core.container_history">
+<span id="tts-data-utils-core-container-history"></span><h3>tts_data_utils.core.container_history<a class="headerlink" href="#module-tts_data_utils.core.container_history" title="Link to this heading"></a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="tts_data_utils.core.container_history.DataContainerHistoryContainer">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">tts_data_utils.core.container_history.</span></span><span class="sig-name descname"><span class="pre">DataContainerHistoryContainer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.container_history.DataContainerHistoryContainer" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#tts_data_utils.core.data_container.DataContainer" title="tts_data_utils.core.data_container.DataContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataContainer</span></code></a></p>
+<p>A special container that is added by default to all data containers (except history 
+containers to avoid infinite recursion).</p>
+<p>As containers are filtered, appended, and sliced, it can become difficult to trace 
+how a particular came to be. The DataContainerHistoryContiner tracks actions that
+have been taken in order to build a container from its initial metadata and including
+each manipulation that happens going forward.</p>
+<p>Data Container history is not meant to make previous states of the container
+reproducable, but just to offer a crutch in debugging code.</p>
+<p>The number of records is also provided to enable some level of data analysis based
+on filtering values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – The name of this instantiation of the data container.</p></li>
+<li><p><strong>metadata</strong> (<em>dict</em>) – Dictionary of open-ended metadata that can be provided in extensions of DataContainer</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tts_data_utils.core.container_history.DataContainerHistoryContainer.DATA_ITEM_CLS">
+<span class="sig-name descname"><span class="pre">DATA_ITEM_CLS</span></span><a class="headerlink" href="#tts_data_utils.core.container_history.DataContainerHistoryContainer.DATA_ITEM_CLS" title="Link to this definition"></a></dt>
+<dd><p>alias of <a class="reference internal" href="#tts_data_utils.core.container_history.DataContainerHistoryItem" title="tts_data_utils.core.container_history.DataContainerHistoryItem"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataContainerHistoryItem</span></code></a></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tts_data_utils.core.container_history.DataContainerHistoryContainer.NAME">
+<span class="sig-name descname"><span class="pre">NAME</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'data</span> <span class="pre">container</span> <span class="pre">history'</span></span><a class="headerlink" href="#tts_data_utils.core.container_history.DataContainerHistoryContainer.NAME" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="tts_data_utils.core.container_history.DataContainerHistoryContainer.repr_cols">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">repr_cols</span></span><a class="headerlink" href="#tts_data_utils.core.container_history.DataContainerHistoryContainer.repr_cols" title="Link to this definition"></a></dt>
+<dd><p>Columns to be used for representations (terminal, HTML, etc.).</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="tts_data_utils.core.container_history.DataContainerHistoryItem">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">tts_data_utils.core.container_history.</span></span><span class="sig-name descname"><span class="pre">DataContainerHistoryItem</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subcontainers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">copy_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cast_fields</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fill</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_django</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_dispo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.container_history.DataContainerHistoryItem" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#tts_data_utils.core.data_item.DataItem" title="tts_data_utils.core.data_item.DataItem"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataItem</span></code></a></p>
+<p>DataItem to go with DataContainerHistoryContainer</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Action</strong> (<em>str</em>) – Which action was taken at the step represented in this row?</p></li>
+<li><p><strong>Description</strong> (<em>str</em>) – Description of the action taken at the step represented in this row</p></li>
+<li><p><strong>Count</strong> (<em>Starting</em>) – Number of records after the action was taken</p></li>
+<li><p><strong>Count</strong> – Number of records before the action was taken</p></li>
+<li><p><strong>Remaining</strong> (<em>Percent</em>) – Percentage of records at this step relative to previous step</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tts_data_utils.core.container_history.DataContainerHistoryItem.DICT_VALID_KEYS">
+<span class="sig-name descname"><span class="pre">DICT_VALID_KEYS</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[('Action',</span> <span class="pre">&lt;class</span> <span class="pre">'str'&gt;),</span> <span class="pre">('Description',</span> <span class="pre">&lt;class</span> <span class="pre">'str'&gt;),</span> <span class="pre">('Ending</span> <span class="pre">Count',</span> <span class="pre">(&lt;class</span> <span class="pre">'int'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'float'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'str'&gt;)),</span> <span class="pre">('Starting</span> <span class="pre">Count',</span> <span class="pre">(&lt;class</span> <span class="pre">'int'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'float'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'str'&gt;)),</span> <span class="pre">('Percent</span> <span class="pre">Remaining',</span> <span class="pre">(&lt;class</span> <span class="pre">'int'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'float'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'str'&gt;))]</span></span><a class="headerlink" href="#tts_data_utils.core.container_history.DataContainerHistoryItem.DICT_VALID_KEYS" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tts_data_utils.core.container_history.DataContainerHistoryItem.time">
+<span class="sig-name descname"><span class="pre">time</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.container_history.DataContainerHistoryItem.time" title="Link to this definition"></a></dt>
+<dd><p>Must define some way to time-tag each data item.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-tts_data_utils.core.data_container">
+<span id="tts-data-utils-core-data-container"></span><h3>tts_data_utils.core.data_container<a class="headerlink" href="#module-tts_data_utils.core.data_container" title="Link to this heading"></a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_container.DataContainer">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">tts_data_utils.core.data_container.</span></span><span class="sig-name descname"><span class="pre">DataContainer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">raw_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subcontainers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csv_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xlsx_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">django_records</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cast_fields</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lorem</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.data_container.DataContainer" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<p>Primary (abstract) class for this library. Provides representation of 2D data with 
+extension hooks for easy definition of quality-of-life features for any bespoke 
+data type across projects.</p>
+<p><strong>Concept:</strong>
+Allows for easy tabular representation in terminals and HTML, playing nicely with 
+<cite>html_utils</cite> to provide easy reporting of tabular data and nested tabular data.</p>
+<p>When defining an extension of this class, a <cite>DataItem</cite> class is also provided, 
+which controls the expected columns in each row.</p>
+<p>Each row of the 2D data is represented by an instance of the associated <cite>DataItem</cite> 
+class, stored in <cite>self.records</cite>. Most dunder methods have been defined such that 
+this class behaves like a list (mapping to <cite>self.records</cite>), but carries the 
+container’s metadata and history along with it.</p>
+<p><strong>TO DO:</strong> Provide gallery of examples of outputs (see ticket #34 TO DO: Migrate out of JPL-internal issues)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>raw_data</strong> (<em>list</em><em>[</em><em>dict</em><em>]</em><em>, </em><em>optional</em>) – 2D data to be transformed into DataContainer.</p></li>
+<li><p><strong>subcontainers</strong> (<em>list</em><em>[</em><em>dict</em><em>[</em><em>str</em><em>, </em><a class="reference internal" href="#tts_data_utils.core.data_container.DataContainer" title="tts_data_utils.core.data_container.DataContainer"><em>DataContainer</em></a><em>]</em><em>]</em><em>, </em><em>optional</em>) – List of dictionaries where key is a label and value is a 
+DataContainer. Must match length of raw_data.</p></li>
+<li><p><strong>csv_path</strong> (<em>Path</em><em> | </em><em>str</em><em>, </em><em>optional</em>) – Path for CSV to be transformed into DataContainer.</p></li>
+<li><p><strong>xlsx_path</strong> (<em>Path</em><em> | </em><em>str</em><em>, </em><em>optional</em>) – Path for XLSX to be transformed into DataContainer.</p></li>
+<li><p><strong>django_records</strong> (<em>QuerySet</em><em>, </em><em>optional</em>) – Django object containing data to be transformed.</p></li>
+<li><p><strong>metadata</strong> (<em>dict</em><em>, </em><em>optional</em>) – Arbitrary user information to be carried with the container.</p></li>
+<li><p><strong>name</strong> (<em>str</em><em>, </em><em>optional</em>) – Name of the DataContainer instance.</p></li>
+<li><p><strong>cast_fields</strong> (<em>bool</em>) – If True, attempts to force data into types defined in DataItem.</p></li>
+<li><p><strong>validate</strong> (<em>bool</em>) – If True, validates inputs against DataItem’s valid keys/types.</p></li>
+<li><p><strong>lorem</strong> (<em>int</em><em>, </em><em>optional</em>) – If provided as an integer, generates that many rows of dummy data.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_container.DataContainer.DATA_ITEM_CLS">
+<span class="sig-name descname"><span class="pre">DATA_ITEM_CLS</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#tts_data_utils.core.data_container.DataContainer.DATA_ITEM_CLS" title="Link to this definition"></a></dt>
+<dd><p>Associated DataItem that must be defined alongside a DataContainer.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_container.DataContainer.DO_NOT_DIFF">
+<span class="sig-name descname"><span class="pre">DO_NOT_DIFF</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[]</span></span><a class="headerlink" href="#tts_data_utils.core.data_container.DataContainer.DO_NOT_DIFF" title="Link to this definition"></a></dt>
+<dd><p>Keys to ignore when running self.diff.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_container.DataContainer.NAME">
+<span class="property"><span class="k"><span class="pre">abstract</span></span><span class="w"> </span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">NAME</span></span><a class="headerlink" href="#tts_data_utils.core.data_container.DataContainer.NAME" title="Link to this definition"></a></dt>
+<dd><p>Name of the data type being contained, i.e. ‘evr’, ‘transpire_commands’.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_container.DataContainer.after">
+<span class="sig-name descname"><span class="pre">after</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inclusive</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maximum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exactly</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.data_container.DataContainer.after" title="Link to this definition"></a></dt>
+<dd><p>Return a decimated verison of this DataContainer where all rows where column in “key” 
+occur after the value in the “time” parameter.</p>
+<p>Unlike most other filter methods, time MUST be a datetime.</p>
+<p>Note that “key” is not requried since DataItems have default time columns. If an object takes multiple
+time columns (or if using something like GenericContainer with no default time label), the time_label
+kwarg is provided.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> (<em>datetime</em>) – Time to compare against</p></li>
+<li><p><strong>time_label</strong> (<em>str</em>) – Name of time column to use if not the default</p></li>
+<li><p><strong>inclusive</strong> (<em>bool</em>) – If a row’s time matches “time” exactly, should it be included?</p></li>
+<li><p><strong>minimum</strong> (<em>int</em>) – Minimum number of records to return. Will raise an exception if too few records match</p></li>
+<li><p><strong>maximum</strong> (<em>int</em>) – Maximum number of records to return. Will raise an exception if too many records match</p></li>
+<li><p><strong>exactly</strong> (<em>int</em>) – Exact number of records to return. Will raise an exception any other number of records match</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Returns a new DataContainer exactly the same as this one, but with updated history and</p>
+</dd>
+</dl>
+<p>filtered outputs (except if exactly=1, in which case it will return a DataItem only).
+:rtype: DataContainer or DataItem</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_container.DataContainer.append">
+<span class="sig-name descname"><span class="pre">append</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">items</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cast_fields</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fill</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.data_container.DataContainer.append" title="Link to this definition"></a></dt>
+<dd><p>Adds one or more items to the end of the container’s records.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>items</strong> – A dictionary, DataItem, or a list of either to append.</p></li>
+<li><p><strong>cast_fields</strong> – If True, attempts to force data into types defined in DataItem.</p></li>
+<li><p><strong>fill</strong> – If True, fills in missing keys with default values.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_container.DataContainer.assert_records_match_hash">
+<span class="sig-name descname"><span class="pre">assert_records_match_hash</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expected_hash</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.data_container.DataContainer.assert_records_match_hash" title="Link to this definition"></a></dt>
+<dd><p>Validates the integrity of the records against a known hash.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_container.DataContainer.before">
+<span class="sig-name descname"><span class="pre">before</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inclusive</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maximum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exactly</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.data_container.DataContainer.before" title="Link to this definition"></a></dt>
+<dd><p>Return a decimated verison of this DataContainer where all rows where column in “key” 
+occur before the value in the “time” parameter.</p>
+<p>Unlike most other filter methods, time MUST be a datetime.</p>
+<p>Note that “key” is not requried since DataItems have default time columns. If an object takes multiple
+time columns (or if using something like GenericContainer with no default time label), the time_label
+kwarg is provided.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> (<em>datetime</em>) – Time to compare against</p></li>
+<li><p><strong>time_label</strong> (<em>str</em>) – Name of time column to use if not the default</p></li>
+<li><p><strong>inclusive</strong> (<em>bool</em>) – If a row’s time matches “time” exactly, should it be included?</p></li>
+<li><p><strong>minimum</strong> (<em>int</em>) – Minimum number of records to return. Will raise an exception if too few records match</p></li>
+<li><p><strong>maximum</strong> (<em>int</em>) – Maximum number of records to return. Will raise an exception if too many records match</p></li>
+<li><p><strong>exactly</strong> (<em>int</em>) – Exact number of records to return. Will raise an exception any other number of records match</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Returns a new DataContainer exactly the same as this one, but with updated history and</p>
+</dd>
+</dl>
+<p>filtered outputs (except if exactly=1, in which case it will return a DataItem only).
+:rtype: DataContainer or DataItem</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_container.DataContainer.between">
+<span class="sig-name descname"><span class="pre">between</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lower</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upper</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inclusive</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'both'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maximum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exactly</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.data_container.DataContainer.between" title="Link to this definition"></a></dt>
+<dd><p>Return a decimated verison of this DataContainer where all rows where column in “key” 
+occur between the values in the “lower” and “upper” parameters.</p>
+<p>Unlike most other filter methods, time MUST be a datetime.</p>
+<p>Note that “key” is required on this method unlike the before and after methods. This is just an error
+by the developer. It is slated to be fixed at the next major release since it will be a breaking change:
+issue #32 (TO DO: Migrate out of JPL-internal issues)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> (<em>str</em>) – Name of time column to use</p></li>
+<li><p><strong>value</strong> (<em>datetime</em>) – Time to compare against</p></li>
+<li><p><strong>inclusive</strong> (<em>str</em><em> (</em><em>should be upper</em><em>, </em><em>lower</em><em>, </em><em>both</em><em>, or </em><em>neither</em><em>)</em>) – If a row’s time matches “time” exactly, should it be included?</p></li>
+<li><p><strong>minimum</strong> (<em>int</em>) – Minimum number of records to return. Will raise an exception if too few records match</p></li>
+<li><p><strong>maximum</strong> (<em>int</em>) – Maximum number of records to return. Will raise an exception if too many records match</p></li>
+<li><p><strong>exactly</strong> (<em>int</em>) – Exact number of records to return. Will raise an exception any other number of records match</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Returns a new DataContainer exactly the same as this one, but with updated history and</p>
+</dd>
+</dl>
+<p>filtered outputs (except if exactly=1, in which case it will return a DataItem only).
+:rtype: DataContainer or DataItem</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_container.DataContainer.calculate_records_hash">
+<span class="sig-name descname"><span class="pre">calculate_records_hash</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.data_container.DataContainer.calculate_records_hash" title="Link to this definition"></a></dt>
+<dd><p>Generates a SHA256 hash representing the current state of all records.</p>
+<p><strong>The Process:</strong>
+Normalizes timestamps based on DataItem time formats to ensure consistent 
+string representation before hashing the JSON-encoded record set.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_container.DataContainer.compare_rows">
+<span class="sig-name descname"><span class="pre">compare_rows</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">l</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.data_container.DataContainer.compare_rows" title="Link to this definition"></a></dt>
+<dd><p>Calculates the similarity between two DataItems by counting matching values.</p>
+<p><strong>Concept:</strong>
+This is used by the visual diff engine to determine if two rows are similar 
+enough to be considered a ‘replacement’ rather than an ‘insertion’ and 
+‘deletion’. It iterates through keys in the left item and checks for 
+equality in the right item.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>l</strong> (<a class="reference internal" href="#tts_data_utils.core.data_item.DataItem" title="tts_data_utils.core.data_item.DataItem"><em>DataItem</em></a>) – The left DataItem.</p></li>
+<li><p><strong>r</strong> (<a class="reference internal" href="#tts_data_utils.core.data_item.DataItem" title="tts_data_utils.core.data_item.DataItem"><em>DataItem</em></a>) – The right DataItem.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Integer count of identical fields.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_container.DataContainer.contains">
+<span class="sig-name descname"><span class="pre">contains</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">substring</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">case_sensitive</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maximum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exactly</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.data_container.DataContainer.contains" title="Link to this definition"></a></dt>
+<dd><p>Return a decimated verison of this DataContainer where all rows where column in “key” 
+field contains the value in the “substring” parameter as a substring.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> (<em>str</em>) – Name of column to filter on</p></li>
+<li><p><strong>substring</strong> (<em>str</em>) – Value to compare against</p></li>
+<li><p><strong>value</strong> (<em>bool</em>) – Should the substring match be case sensitive?</p></li>
+<li><p><strong>minimum</strong> (<em>int</em>) – Minimum number of records to return. Will raise an exception if too few records match</p></li>
+<li><p><strong>maximum</strong> (<em>int</em>) – Maximum number of records to return. Will raise an exception if too many records match</p></li>
+<li><p><strong>exactly</strong> (<em>int</em>) – Exact number of records to return. Will raise an exception any other number of records match</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Returns a new DataContainer exactly the same as this one, but with updated history and</p>
+</dd>
+</dl>
+<p>filtered outputs (except if exactly=1, in which case it will return a DataItem only).
+:rtype: DataContainer or DataItem</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_container.DataContainer.default_html_row_style">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">default_html_row_style</span></span><a class="headerlink" href="#tts_data_utils.core.data_container.DataContainer.default_html_row_style" title="Link to this definition"></a></dt>
+<dd><p>Returns default CSS dictionary for HTML rows.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_container.DataContainer.default_time_label">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">default_time_label</span></span><a class="headerlink" href="#tts_data_utils.core.data_container.DataContainer.default_time_label" title="Link to this definition"></a></dt>
+<dd><p>Returns the primary key used for time-based operations.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_container.DataContainer.diff">
+<span class="sig-name descname"><span class="pre">diff</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">left</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'48vf34VD)$'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">right</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'48vf34VD)$'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ancestors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">diff_container</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">summarize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">do_not_diff_keys</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">float_tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-10</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.data_container.DataContainer.diff" title="Link to this definition"></a></dt>
+<dd><p>Generates a DiffContainer with a comprehensive comparison between two objects.
+Recursively trees down through all attributes until the structures are fully diffed.</p>
+<p><strong>The Concept:</strong>
+This method is the backbone of the library’s regression testing suite. It is designed 
+to compare a runtime DataContainer against a “vetted” baseline (typically from a CSV).
+It identifies missing keys, mismatched values, and type discrepancies across 
+nested lists and dictionaries.</p>
+<p><strong>Handling Differently Ordered Data:</strong>
+Note that this method does not yet handle reordered containers gracefully; it is 
+optimized for structures that are expected to be very similar in sequence.</p>
+<p><strong>The Null Guard:</strong>
+The default value ‘48vf34VD)$’ is used instead of None to allow <cite>None</cite> to be 
+passed as a valid value to be diffed without triggering the “missing argument” logic.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>left</strong> – The primary value or container to compare.</p></li>
+<li><p><strong>right</strong> – The second value or container to compare. If omitted, <cite>self</cite> is 
+treated as <cite>left</cite> and the first argument is treated as <cite>right</cite>.</p></li>
+<li><p><strong>name</strong> – Internal tracker for the current field name (used in recursion).</p></li>
+<li><p><strong>ancestors</strong> – Internal tracker for the breadcrumb path (used in recursion).</p></li>
+<li><p><strong>diff_container</strong> – The accumulator for diff results.</p></li>
+<li><p><strong>summarize</strong> – If True, returns a boolean (True if all match) instead of the container.</p></li>
+<li><p><strong>do_not_diff_keys</strong> – Keys to skip (useful for history or dynamic IDs).</p></li>
+<li><p><strong>ignore</strong> – Output paths to prune from the final results.</p></li>
+<li><p><strong>float_tol</strong> – Maximum allowance for floating-point precision drift.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A DiffContainer object or a boolean result.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_container.DataContainer.docx_table">
+<span class="sig-name descname"><span class="pre">docx_table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">template</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.data_container.DataContainer.docx_table" title="Link to this definition"></a></dt>
+<dd><p>Produces a Microsoft Word table representation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>template</strong> – Path to an optional template docx for styling.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Rendered DocxTable object.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_container.DataContainer.doesnotcontain">
+<span class="sig-name descname"><span class="pre">doesnotcontain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">substring</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">case_sensitive</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maximum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exactly</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.data_container.DataContainer.doesnotcontain" title="Link to this definition"></a></dt>
+<dd><p>Return a decimated verison of this DataContainer where all rows where column in “key” 
+field does not contain the value in the “substring” parameter as a substring.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> (<em>str</em>) – Name of column to filter on</p></li>
+<li><p><strong>substring</strong> (<em>str</em>) – Value to compare against</p></li>
+<li><p><strong>value</strong> (<em>bool</em>) – Should the substring match be case sensitive?</p></li>
+<li><p><strong>minimum</strong> (<em>int</em>) – Minimum number of records to return. Will raise an exception if too few records match</p></li>
+<li><p><strong>maximum</strong> (<em>int</em>) – Maximum number of records to return. Will raise an exception if too many records match</p></li>
+<li><p><strong>exactly</strong> (<em>int</em>) – Exact number of records to return. Will raise an exception any other number of records match</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Returns a new DataContainer exactly the same as this one, but with updated history and</p>
+</dd>
+</dl>
+<p>filtered outputs (except if exactly=1, in which case it will return a DataItem only).
+:rtype: DataContainer or DataItem</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_container.DataContainer.doesnotmatch">
+<span class="sig-name descname"><span class="pre">doesnotmatch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pattern</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maximum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exactly</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.data_container.DataContainer.doesnotmatch" title="Link to this definition"></a></dt>
+<dd><p>Return a decimated verison of this DataContainer where all rows where column in “key” 
+does not match the regex in the parameter “pattern”.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> (<em>str</em>) – Name of column to not match against</p></li>
+<li><p><strong>time_label</strong> (<em>str</em>) – Name of time column to use if not the default</p></li>
+<li><p><strong>minimum</strong> (<em>int</em>) – Minimum number of records to return. Will raise an exception if too few records match</p></li>
+<li><p><strong>maximum</strong> (<em>int</em>) – Maximum number of records to return. Will raise an exception if too many records match</p></li>
+<li><p><strong>exactly</strong> (<em>int</em>) – Exact number of records to return. Will raise an exception any other number of records match</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Returns a new DataContainer exactly the same as this one, but with updated history and</p>
+</dd>
+</dl>
+<p>filtered outputs (except if exactly=1, in which case it will return a DataItem only).
+:rtype: DataContainer or DataItem</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_container.DataContainer.eq">
+<span class="sig-name descname"><span class="pre">eq</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maximum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exactly</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tolerance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.data_container.DataContainer.eq" title="Link to this definition"></a></dt>
+<dd><p>Return a decimated verison of this DataContainer where all rows where column in “key” 
+field matches value in “value” field.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> (<em>str</em>) – Name of column to filter on</p></li>
+<li><p><strong>value</strong> (<em>Varies depending on contents</em><em> of </em><em>&quot;key&quot; column</em>) – Value to compare against</p></li>
+<li><p><strong>minimum</strong> (<em>int</em>) – Minimum number of records to return. Will raise an exception if too few records match</p></li>
+<li><p><strong>maximum</strong> (<em>int</em>) – Maximum number of records to return. Will raise an exception if too many records match</p></li>
+<li><p><strong>exactly</strong> (<em>int</em>) – Exact number of records to return. Will raise an exception any other number of records match</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Returns a new DataContainer exactly the same as this one, but with updated history and</p>
+</dd>
+</dl>
+<p>filtered outputs (except if exactly=1, in which case it will return a DataItem only).
+:rtype: DataContainer or DataItem</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_container.DataContainer.file_contents_as_string">
+<span class="sig-name descname"><span class="pre">file_contents_as_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.data_container.DataContainer.file_contents_as_string" title="Link to this definition"></a></dt>
+<dd><p>Placeholder for breaking tests. One day at a time here…</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_container.DataContainer.gt">
+<span class="sig-name descname"><span class="pre">gt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maximum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exactly</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.data_container.DataContainer.gt" title="Link to this definition"></a></dt>
+<dd><p>Return a decimated verison of this DataContainer where all rows where column in “key” 
+field is greater than value in “value” parameter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> (<em>str</em>) – Name of column to filter on</p></li>
+<li><p><strong>value</strong> (<em>Varies depending on contents</em><em> of </em><em>&quot;key&quot; column</em>) – Value to compare against</p></li>
+<li><p><strong>minimum</strong> (<em>int</em>) – Minimum number of records to return. Will raise an exception if too few records match</p></li>
+<li><p><strong>maximum</strong> (<em>int</em>) – Maximum number of records to return. Will raise an exception if too many records match</p></li>
+<li><p><strong>exactly</strong> (<em>int</em>) – Exact number of records to return. Will raise an exception any other number of records match</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Returns a new DataContainer exactly the same as this one, but with updated history and</p>
+</dd>
+</dl>
+<p>filtered outputs (except if exactly=1, in which case it will return a DataItem only).
+:rtype: DataContainer or DataItem</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_container.DataContainer.gte">
+<span class="sig-name descname"><span class="pre">gte</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maximum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exactly</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.data_container.DataContainer.gte" title="Link to this definition"></a></dt>
+<dd><p>Return a decimated verison of this DataContainer where all rows where column in “key” 
+field is greater than or equal to value in “value” parameter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> (<em>str</em>) – Name of column to filter on</p></li>
+<li><p><strong>value</strong> (<em>Varies depending on contents</em><em> of </em><em>&quot;key&quot; column</em>) – Value to compare against</p></li>
+<li><p><strong>minimum</strong> (<em>int</em>) – Minimum number of records to return. Will raise an exception if too few records match</p></li>
+<li><p><strong>maximum</strong> (<em>int</em>) – Maximum number of records to return. Will raise an exception if too many records match</p></li>
+<li><p><strong>exactly</strong> (<em>int</em>) – Exact number of records to return. Will raise an exception any other number of records match</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Returns a new DataContainer exactly the same as this one, but with updated history and</p>
+</dd>
+</dl>
+<p>filtered outputs (except if exactly=1, in which case it will return a DataItem only).
+:rtype: DataContainer or DataItem</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_container.DataContainer.inject_error">
+<span class="sig-name descname"><span class="pre">inject_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lamb</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.data_container.DataContainer.inject_error" title="Link to this definition"></a></dt>
+<dd><p>Iterates through records and applies a transformation lambda. 
+Useful for error injection or data simulation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>lamb</strong> – A function that accepts a record and returns (bool, key, value).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_container.DataContainer.insert">
+<span class="sig-name descname"><span class="pre">insert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">record</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.data_container.DataContainer.insert" title="Link to this definition"></a></dt>
+<dd><p>Inserts a record at the specified index and returns a new container instance.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_container.DataContainer.isin">
+<span class="sig-name descname"><span class="pre">isin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maximum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exactly</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.data_container.DataContainer.isin" title="Link to this definition"></a></dt>
+<dd><p>Return a decimated verison of this DataContainer where all rows where column in “key” 
+field matches value any of the values in the list “values”.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> (<em>str</em>) – Name of column to filter on</p></li>
+<li><p><strong>value</strong> – Value to compare against</p></li>
+<li><p><strong>minimum</strong> (<em>int</em>) – Minimum number of records to return. Will raise an exception if too few records match</p></li>
+<li><p><strong>maximum</strong> (<em>int</em>) – Maximum number of records to return. Will raise an exception if too many records match</p></li>
+<li><p><strong>exactly</strong> (<em>int</em>) – Exact number of records to return. Will raise an exception any other number of records match</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Returns a new DataContainer exactly the same as this one, but with updated history and</p>
+</dd>
+</dl>
+<p>filtered outputs (except if exactly=1, in which case it will return a DataItem only).
+:rtype: DataContainer or DataItem</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_container.DataContainer.lt">
+<span class="sig-name descname"><span class="pre">lt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maximum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exactly</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.data_container.DataContainer.lt" title="Link to this definition"></a></dt>
+<dd><p>Return a decimated verison of this DataContainer where all rows where column in “key” 
+field is less than value in “value” parameter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> (<em>str</em>) – Name of column to filter on</p></li>
+<li><p><strong>value</strong> (<em>Varies depending on contents</em><em> of </em><em>&quot;key&quot; column</em>) – Value to compare against</p></li>
+<li><p><strong>minimum</strong> (<em>int</em>) – Minimum number of records to return. Will raise an exception if too few records match</p></li>
+<li><p><strong>maximum</strong> (<em>int</em>) – Maximum number of records to return. Will raise an exception if too many records match</p></li>
+<li><p><strong>exactly</strong> (<em>int</em>) – Exact number of records to return. Will raise an exception any other number of records match</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Returns a new DataContainer exactly the same as this one, but with updated history and</p>
+</dd>
+</dl>
+<p>filtered outputs (except if exactly=1, in which case it will return a DataItem only).
+:rtype: DataContainer or DataItem</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_container.DataContainer.lte">
+<span class="sig-name descname"><span class="pre">lte</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maximum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exactly</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.data_container.DataContainer.lte" title="Link to this definition"></a></dt>
+<dd><p>Return a decimated verison of this DataContainer where all rows where column in “key” 
+field is less than or equal to value in “value” parameter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> (<em>str</em>) – Name of column to filter on</p></li>
+<li><p><strong>value</strong> (<em>Varies depending on contents</em><em> of </em><em>&quot;key&quot; column</em>) – Value to compare against</p></li>
+<li><p><strong>minimum</strong> (<em>int</em>) – Minimum number of records to return. Will raise an exception if too few records match</p></li>
+<li><p><strong>maximum</strong> (<em>int</em>) – Maximum number of records to return. Will raise an exception if too many records match</p></li>
+<li><p><strong>exactly</strong> (<em>int</em>) – Exact number of records to return. Will raise an exception any other number of records match</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Returns a new DataContainer exactly the same as this one, but with updated history and</p>
+</dd>
+</dl>
+<p>filtered outputs (except if exactly=1, in which case it will return a DataItem only).
+:rtype: DataContainer or DataItem</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_container.DataContainer.matches">
+<span class="sig-name descname"><span class="pre">matches</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pattern</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maximum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exactly</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.data_container.DataContainer.matches" title="Link to this definition"></a></dt>
+<dd><p>Return a decimated verison of this DataContainer where all rows where column in “key” 
+matches the regex in the parameter “pattern”.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> (<em>str</em>) – Name of column to match against</p></li>
+<li><p><strong>pattern</strong> (<em>r-string</em>) – Regex pattern</p></li>
+<li><p><strong>minimum</strong> (<em>int</em>) – Minimum number of records to return. Will raise an exception if too few records match</p></li>
+<li><p><strong>maximum</strong> (<em>int</em>) – Maximum number of records to return. Will raise an exception if too many records match</p></li>
+<li><p><strong>exactly</strong> (<em>int</em>) – Exact number of records to return. Will raise an exception any other number of records match</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Returns a new DataContainer exactly the same as this one, but with updated history and</p>
+</dd>
+</dl>
+<p>filtered outputs (except if exactly=1, in which case it will return a DataItem only).
+:rtype: DataContainer or DataItem</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_container.DataContainer.ne">
+<span class="sig-name descname"><span class="pre">ne</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maximum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exactly</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.data_container.DataContainer.ne" title="Link to this definition"></a></dt>
+<dd><p>Return a decimated verison of this DataContainer where all rows where column in “key” 
+field does not match value in “value” field.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> (<em>str</em>) – Name of column to filter on</p></li>
+<li><p><strong>value</strong> (<em>Varies depending on contents</em><em> of </em><em>&quot;key&quot; column</em>) – Value to compare against</p></li>
+<li><p><strong>minimum</strong> (<em>int</em>) – Minimum number of records to return. Will raise an exception if too few records match</p></li>
+<li><p><strong>maximum</strong> (<em>int</em>) – Maximum number of records to return. Will raise an exception if too many records match</p></li>
+<li><p><strong>exactly</strong> (<em>int</em>) – Exact number of records to return. Will raise an exception any other number of records match</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Returns a new DataContainer exactly the same as this one, but with updated history and</p>
+</dd>
+</dl>
+<p>filtered outputs (except if exactly=1, in which case it will return a DataItem only).
+:rtype: DataContainer or DataItem</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_container.DataContainer.notin">
+<span class="sig-name descname"><span class="pre">notin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maximum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exactly</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.data_container.DataContainer.notin" title="Link to this definition"></a></dt>
+<dd><p>Return a decimated verison of this DataContainer where all rows where column in “key” 
+field does not match any value in the list “values”.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> (<em>str</em>) – Name of column to filter on</p></li>
+<li><p><strong>value</strong> – Value to compare against</p></li>
+<li><p><strong>minimum</strong> (<em>int</em>) – Minimum number of records to return. Will raise an exception if too few records match</p></li>
+<li><p><strong>maximum</strong> (<em>int</em>) – Maximum number of records to return. Will raise an exception if too many records match</p></li>
+<li><p><strong>exactly</strong> (<em>int</em>) – Exact number of records to return. Will raise an exception any other number of records match</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Returns a new DataContainer exactly the same as this one, but with updated history and</p>
+</dd>
+</dl>
+<p>filtered outputs (except if exactly=1, in which case it will return a DataItem only).
+:rtype: DataContainer or DataItem</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_container.DataContainer.on_change">
+<span class="sig-name descname"><span class="pre">on_change</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maximum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exactly</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.data_container.DataContainer.on_change" title="Link to this definition"></a></dt>
+<dd><p>Return a decimated verison of this DataContainer where all rows where column in “key” 
+is different than in the row before. Will always include first row.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> (<em>str</em>) – Name of column to inspect for changes</p></li>
+<li><p><strong>time_label</strong> (<em>str</em>) – Name of time column to use if not the default</p></li>
+<li><p><strong>minimum</strong> (<em>int</em>) – Minimum number of records to return. Will raise an exception if too few records match</p></li>
+<li><p><strong>maximum</strong> (<em>int</em>) – Maximum number of records to return. Will raise an exception if too many records match</p></li>
+<li><p><strong>exactly</strong> (<em>int</em>) – Exact number of records to return. Will raise an exception any other number of records match</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Returns a new DataContainer exactly the same as this one, but with updated history and</p>
+</dd>
+</dl>
+<p>filtered outputs (except if exactly=1, in which case it will return a DataItem only).
+:rtype: DataContainer or DataItem</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_container.DataContainer.power_table">
+<span class="sig-name descname"><span class="pre">power_table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">superheader</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">columns</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bypass_styles</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">row_styles</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_styles</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.data_container.DataContainer.power_table" title="Link to this definition"></a></dt>
+<dd><p>Produce a rich, interactive HTML table representation of this DataContainer.</p>
+<p><strong>Concept:</strong>
+This method integrates with <cite>html_utils</cite> to translate the 2D records into a 
+<cite>PowerTable</cite>. It handles complex nesting by recursively calling <cite>power_table</cite> 
+on any subcontainers linked to specific rows.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>superheader</strong> (<em>str</em>) – Title row spanning the full width of the table.</p></li>
+<li><p><strong>columns</strong> (<em>list</em><em>[</em><em>str</em><em>]</em>) – Labels to include. Defaults to <cite>self.repr_cols</cite>.</p></li>
+<li><p><strong>bypass_styles</strong> (<em>bool</em>) – If True, default CSS and row-level styles are ignored.</p></li>
+<li><p><strong>row_styles</strong> (<em>list</em><em>[</em><em>dict</em><em>[</em><em>str</em><em>, </em><em>str</em><em>]</em><em>]</em>) – Custom CSS for each row. Must match <cite>self.records</cite> length.</p></li>
+<li><p><strong>cell_styles</strong> (<em>list</em><em>[</em><em>list</em><em>[</em><em>dict</em><em>[</em><em>str</em><em>, </em><em>str</em><em>]</em><em>]</em><em>]</em>) – Custom CSS for each cell. Must match <cite>self.records</cite> length.</p></li>
+<li><p><strong>kwargs</strong> – Passthrough arguments for PowerTable (e.g., <cite>id</cite>, <cite>add_filters</cite>).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A rendered PowerTable component.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_container.DataContainer.read_csv">
+<span class="sig-name descname"><span class="pre">read_csv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">csv_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.data_container.DataContainer.read_csv" title="Link to this definition"></a></dt>
+<dd><p>Reads a CSV file into a list of record dictionaries.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_container.DataContainer.read_xlsx">
+<span class="sig-name descname"><span class="pre">read_xlsx</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xlsx_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.data_container.DataContainer.read_xlsx" title="Link to this definition"></a></dt>
+<dd><p>Reads an Excel file into a list of record dictionaries, 
+handling NaN values as None.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_container.DataContainer.repr_cols">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">repr_cols</span></span><a class="headerlink" href="#tts_data_utils.core.data_container.DataContainer.repr_cols" title="Link to this definition"></a></dt>
+<dd><p>Columns to be used for representations (terminal, HTML, etc.).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_container.DataContainer.simple_record_table">
+<span class="sig-name descname"><span class="pre">simple_record_table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.data_container.DataContainer.simple_record_table" title="Link to this definition"></a></dt>
+<dd><p>Placeholder for breaking tests. One day at a time here…</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_container.DataContainer.sort">
+<span class="sig-name descname"><span class="pre">sort</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">by</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lam</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reverse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.data_container.DataContainer.sort" title="Link to this definition"></a></dt>
+<dd><p>Return a version of the DataContainer with rows sorted by the row in the “by” kwarg or by
+the lambda funciton in the “lam” kwarg.</p>
+<p>Always sorts by ascending (for now, see <a class="reference external" href="https://github.jpl.nasa.gov/teamtools-studio/data_utils/issues/33">https://github.jpl.nasa.gov/teamtools-studio/data_utils/issues/33</a>)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>by</strong> (<em>str</em>) – Name of column to sort by</p></li>
+<li><p><strong>lam</strong> (<em>lambda</em>) – Lambda to control how values are sorted</p></li>
+<li><p><strong>reverse</strong> (<em>bool</em>) – By default, sorts like Python list sort. This works the same as reverse kwarg on default list sort</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Returns a new DataContainer exactly the same as this one, but with updated history and</p>
+</dd>
+</dl>
+<p>sorted outputs.
+:rtype: DataContainer</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_container.DataContainer.source">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">source</span></span><a class="headerlink" href="#tts_data_utils.core.data_container.DataContainer.source" title="Link to this definition"></a></dt>
+<dd><p>Returns a list of raw source dictionaries for all contained records.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_container.DataContainer.stamp_all">
+<span class="sig-name descname"><span class="pre">stamp_all</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dispo_choice</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dispo_format</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.data_container.DataContainer.stamp_all" title="Link to this definition"></a></dt>
+<dd><p>Iterates through all data and applies a disposition stamp.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_container.DataContainer.subdivide">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">subdivide</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sub_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bypass_validation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.data_container.DataContainer.subdivide" title="Link to this definition"></a></dt>
+<dd><p>Class method to create a new ‘sub-container’ instance.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_container.DataContainer.subdivide_f">
+<span class="sig-name descname"><span class="pre">subdivide_f</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sub_f</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.data_container.DataContainer.subdivide_f" title="Link to this definition"></a></dt>
+<dd><p>Returns a subdivided container based on a filter function.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_container.DataContainer.summarize">
+<span class="sig-name descname"><span class="pre">summarize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expected_values</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_times</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.data_container.DataContainer.summarize" title="Link to this definition"></a></dt>
+<dd><p>Generates a summary table counting occurrences and time ranges for unique values 
+in a specific column.</p>
+<p><strong>The Concept:</strong>
+This method transforms the current data into a frequency report. If <cite>expected_values</cite> 
+are provided, it validates the data against them and ensures the output table 
+follows the user’s preferred ordering, while still appending any unexpected “rogue” 
+values at the end of the list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> (<em>str</em>) – The column name to summarize.</p></li>
+<li><p><strong>expected_values</strong> (<em>list</em><em>, </em><em>optional</em>) – Optional list of values to check for and order by.</p></li>
+<li><p><strong>include_times</strong> (<em>bool</em>) – If True, adds “First Occurrence” and “Last Occurrence” columns.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A GenericContainer containing the summary records.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_container.DataContainer.table">
+<span class="sig-name descname"><span class="pre">table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">columns</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.data_container.DataContainer.table" title="Link to this definition"></a></dt>
+<dd><p>Explicitly prints the ASCII grid table representation to standard output.</p>
+<p><strong>Concept:</strong>
+While <cite>__repr__</cite> handles automatic display in the terminal, this method 
+allows for programmatic printing with an optional subset of columns.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>columns</strong> (<em>list</em><em>[</em><em>str</em><em>]</em><em>, </em><em>optional</em>) – List of column labels to include. Defaults to <cite>self.repr_cols</cite>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_container.DataContainer.to_csv">
+<span class="sig-name descname"><span class="pre">to_csv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">csv_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mkdirs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.data_container.DataContainer.to_csv" title="Link to this definition"></a></dt>
+<dd><p>Writes the container’s records to a CSV file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>csv_path</strong> – Target file path.</p></li>
+<li><p><strong>mkdirs</strong> – If True, creates the target directory if it does not exist.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_container.DataContainer.unique">
+<span class="sig-name descname"><span class="pre">unique</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sort</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.data_container.DataContainer.unique" title="Link to this definition"></a></dt>
+<dd><p>Returns a list of unique values found in a specific column.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> (<em>str</em>) – Name of the column to inspect.</p></li>
+<li><p><strong>exclude</strong> (<em>list</em>) – List of values to filter out of the final unique list.</p></li>
+<li><p><strong>sort</strong> (<em>bool</em>) – If True, the resulting list is sorted ascending.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of unique values.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_container.DataContainer.valid">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">valid</span></span><a class="headerlink" href="#tts_data_utils.core.data_container.DataContainer.valid" title="Link to this definition"></a></dt>
+<dd><p>Returns True if all records pass validation (or if validation is bypassed).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_container.DataContainer.visual_diff">
+<span class="sig-name descname"><span class="pre">visual_diff</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">right</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_cols</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tolerance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.data_container.DataContainer.visual_diff" title="Link to this definition"></a></dt>
+<dd><p>Generates a side-by-side visual alignment between this container and another.</p>
+<p><strong>The Concept:</strong>
+This uses <cite>SequenceMatcher</cite> to find the best horizontal alignment between two 
+datasets. It identifies identical rows, modified rows (replace), and 
+inserted/deleted rows. It then injects “empty” placeholders into the 
+resulting containers so that matching records stay horizontally synchronized 
+when rendered.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>right</strong> (<a class="reference internal" href="#tts_data_utils.core.data_container.DataContainer" title="tts_data_utils.core.data_container.DataContainer"><em>DataContainer</em></a>) – The DataContainer to compare against.</p></li>
+<li><p><strong>ignore_cols</strong> (<em>list</em><em>[</em><em>str</em><em>]</em>) – Columns to exclude from the row-matching signature.</p></li>
+<li><p><strong>tolerance</strong> (<em>dict</em><em>[</em><em>str</em><em>, </em><em>float</em><em>]</em>) – Drift allowance for numeric or datetime columns.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tuple of two VisualDiffContainers (left, right).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_container.DataContainer.with_cols">
+<span class="sig-name descname"><span class="pre">with_cols</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">columns</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.data_container.DataContainer.with_cols" title="Link to this definition"></a></dt>
+<dd><p>Returns a new version of this container with the display columns changed.
+Will add new (empty) columns if they do not currently exist in the records.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>columns</strong> (<em>list</em><em>[</em><em>str</em><em>]</em>) – List of column names to display/return.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A new DataContainer instance with updated column settings.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_container.after">
+<span class="sig-prename descclassname"><span class="pre">tts_data_utils.core.data_container.</span></span><span class="sig-name descname"><span class="pre">after</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inclusive</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.data_container.after" title="Link to this definition"></a></dt>
+<dd><p>Returns a predicate for datetime comparison (later than).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>time</strong> (<em>datetime</em>) – Time for comparison</p></li>
+<li><p><strong>time_label</strong> (<em>str</em>) – Label for time column</p></li>
+<li><p><strong>inclusive</strong> (<em>bool</em>) – Should we include a time that is exactly equal? Defaults to False</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_container.before">
+<span class="sig-prename descclassname"><span class="pre">tts_data_utils.core.data_container.</span></span><span class="sig-name descname"><span class="pre">before</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inclusive</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.data_container.before" title="Link to this definition"></a></dt>
+<dd><p>Returns a predicate for datetime comparison (earlier than).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>time</strong> (<em>datetime</em>) – Time for comparison</p></li>
+<li><p><strong>time_label</strong> (<em>str</em>) – Label for time column</p></li>
+<li><p><strong>inclusive</strong> (<em>bool</em>) – Should we include a time that is exactly equal? Defaults to False</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_container.between">
+<span class="sig-prename descclassname"><span class="pre">tts_data_utils.core.data_container.</span></span><span class="sig-name descname"><span class="pre">between</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lower</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upper</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inclusive</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'both'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.data_container.between" title="Link to this definition"></a></dt>
+<dd><p>Returns a predicate for range comparison.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> (<em>str</em>) – column to filter on</p></li>
+<li><p><strong>lower</strong> – Lower value for range comparison</p></li>
+<li><p><strong>upper</strong> – Upper value for range comparison</p></li>
+<li><p><strong>inclusive</strong> – One of ‘both’, ‘neither’, ‘lower’, or ‘upper’.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_container.contains">
+<span class="sig-prename descclassname"><span class="pre">tts_data_utils.core.data_container.</span></span><span class="sig-name descname"><span class="pre">contains</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">substring</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">case_sensitive</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.data_container.contains" title="Link to this definition"></a></dt>
+<dd><p>Returns a predicate for substring matching.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> (<em>str</em>) – column to filter on</p></li>
+<li><p><strong>substring</strong> (<em>str</em>) – Substring to check values for</p></li>
+<li><p><strong>case_sensitive</strong> (<em>bool</em>) – whether to check with case sensitiveiy or not. Defaults to True</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_container.doesnotcontain">
+<span class="sig-prename descclassname"><span class="pre">tts_data_utils.core.data_container.</span></span><span class="sig-name descname"><span class="pre">doesnotcontain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">substring</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">case_sensitive</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.data_container.doesnotcontain" title="Link to this definition"></a></dt>
+<dd><p>Returns a predicate for negative substring matching.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> (<em>str</em>) – column to filter on</p></li>
+<li><p><strong>substring</strong> (<em>str</em>) – Substring to check values for</p></li>
+<li><p><strong>case_sensitive</strong> (<em>bool</em>) – whether to check with case sensitiveiy or not. Defaults to True</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_container.doesnotmatch">
+<span class="sig-prename descclassname"><span class="pre">tts_data_utils.core.data_container.</span></span><span class="sig-name descname"><span class="pre">doesnotmatch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pattern</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.data_container.doesnotmatch" title="Link to this definition"></a></dt>
+<dd><p>Returns a predicate for negative regex matching.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> (<em>str</em>) – column to filter on</p></li>
+<li><p><strong>pattern</strong> (<em>str</em>) – regex pattern to match with</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_container.eq">
+<span class="sig-prename descclassname"><span class="pre">tts_data_utils.core.data_container.</span></span><span class="sig-name descname"><span class="pre">eq</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tolerance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.data_container.eq" title="Link to this definition"></a></dt>
+<dd><p>Returns a predicate for: field == value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> (<em>str</em><em>, </em><em>int</em><em>, </em><em>float</em><em>, </em><em>datetime</em>) – column to filter on</p></li>
+<li><p><strong>value</strong> (<em>any</em>) – value to check against</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_container.find_bad_utf8_characters">
+<span class="sig-prename descclassname"><span class="pre">tts_data_utils.core.data_container.</span></span><span class="sig-name descname"><span class="pre">find_bad_utf8_characters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.data_container.find_bad_utf8_characters" title="Link to this definition"></a></dt>
+<dd><p>Helper function to identify non-UTF-8 characters in CSV files, common when 
+interacting with Windows-generated Microsoft Excel files.</p>
+<p><strong>The Problem:</strong>
+When CSVs are saved via Excel on Windows, non-UTF-8 characters—like curled 
+quotation marks, single-character arrows, and degree symbols—are often added. 
+Attempting to read these into Pandas causes a <cite>UnicodeDecodeError</cite>.</p>
+<p><strong>The Solution:</strong>
+This script allows developers to catch that exception, read the file in binary 
+mode, and report the exact line and byte offset of the first error to 
+facilitate cleaning.</p>
+<p><strong>Future Improvements:</strong>
+* Amend to repair the file automatically (referencing the M20 dictionary</p>
+<blockquote>
+<div><p>input management logic).</p>
+</div></blockquote>
+<ul class="simple">
+<li><p>Report all encoding errors instead of just the first.</p></li>
+</ul>
+<p>See ticket #31 ( TO DO: Migrate out of JPL-internal issues))</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>filepath</strong> (<em>str</em><em> or </em><em>pathlib.Path</em>) – Path to the CSV file to be checked.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_container.gt">
+<span class="sig-prename descclassname"><span class="pre">tts_data_utils.core.data_container.</span></span><span class="sig-name descname"><span class="pre">gt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.data_container.gt" title="Link to this definition"></a></dt>
+<dd><p>Returns a predicate for: field &gt; value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> (<em>str</em>) – column to filter on</p></li>
+<li><p><strong>value</strong> (<em>int</em><em> or </em><em>float</em>) – value to check against</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_container.gte">
+<span class="sig-prename descclassname"><span class="pre">tts_data_utils.core.data_container.</span></span><span class="sig-name descname"><span class="pre">gte</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.data_container.gte" title="Link to this definition"></a></dt>
+<dd><p>Returns a predicate for: field &gt;= value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> (<em>str</em>) – column to filter on</p></li>
+<li><p><strong>value</strong> (<em>int</em><em> or </em><em>float</em>) – value to check against</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_container.isin">
+<span class="sig-prename descclassname"><span class="pre">tts_data_utils.core.data_container.</span></span><span class="sig-name descname"><span class="pre">isin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.data_container.isin" title="Link to this definition"></a></dt>
+<dd><p>Returns a predicate for: field in list_of_values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> (<em>str</em>) – column to filter on</p></li>
+<li><p><strong>value</strong> (<em>list</em>) – value to check against</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_container.lt">
+<span class="sig-prename descclassname"><span class="pre">tts_data_utils.core.data_container.</span></span><span class="sig-name descname"><span class="pre">lt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.data_container.lt" title="Link to this definition"></a></dt>
+<dd><p>Returns a predicate for: field &lt; value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> (<em>str</em>) – column to filter on</p></li>
+<li><p><strong>value</strong> (<em>int</em><em> or </em><em>float</em>) – value to check against</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_container.lte">
+<span class="sig-prename descclassname"><span class="pre">tts_data_utils.core.data_container.</span></span><span class="sig-name descname"><span class="pre">lte</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.data_container.lte" title="Link to this definition"></a></dt>
+<dd><p>Returns a predicate for: field &lt;= value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> (<em>str</em>) – column to filter on</p></li>
+<li><p><strong>value</strong> (<em>int</em><em> or </em><em>float</em>) – value to check against</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_container.matches">
+<span class="sig-prename descclassname"><span class="pre">tts_data_utils.core.data_container.</span></span><span class="sig-name descname"><span class="pre">matches</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pattern</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.data_container.matches" title="Link to this definition"></a></dt>
+<dd><p>Returns a predicate for regex matching.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> (<em>str</em>) – column to filter on</p></li>
+<li><p><strong>pattern</strong> (<em>str</em>) – regex pattern to match with</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_container.ne">
+<span class="sig-prename descclassname"><span class="pre">tts_data_utils.core.data_container.</span></span><span class="sig-name descname"><span class="pre">ne</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.data_container.ne" title="Link to this definition"></a></dt>
+<dd><p>Returns a predicate for: field != value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> (<em>str</em>) – column to filter on</p></li>
+<li><p><strong>value</strong> (<em>any</em>) – value to check against</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_container.notin">
+<span class="sig-prename descclassname"><span class="pre">tts_data_utils.core.data_container.</span></span><span class="sig-name descname"><span class="pre">notin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.data_container.notin" title="Link to this definition"></a></dt>
+<dd><p>Returns a predicate for: field not in list_of_values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> (<em>str</em>) – column to filter on</p></li>
+<li><p><strong>value</strong> (<em>list</em>) – value to check against</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_container.on_change">
+<span class="sig-prename descclassname"><span class="pre">tts_data_utils.core.data_container.</span></span><span class="sig-name descname"><span class="pre">on_change</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.data_container.on_change" title="Link to this definition"></a></dt>
+<dd><p>Returns a stateful predicate that triggers when the value in a column 
+changes relative to the previous record.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>key</strong> (<em>str</em>) – Column to check for changes in</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-tts_data_utils.core.data_item">
+<span id="tts-data-utils-core-data-item"></span><h3>tts_data_utils.core.data_item<a class="headerlink" href="#module-tts_data_utils.core.data_item" title="Link to this heading"></a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_item.DataItem">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">tts_data_utils.core.data_item.</span></span><span class="sig-name descname"><span class="pre">DataItem</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subcontainers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">copy_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cast_fields</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fill</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_django</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_dispo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.data_item.DataItem" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<p>The fundamental atomic unit of a DataContainer, representing a single row.</p>
+<p><strong>The Concept:</strong>
+A <cite>DataItem</cite> acts as a “Smart Dictionary” with a memory. It separates data into 
+two layers: <strong>Source</strong> and <strong>Derived</strong>.</p>
+<p>Think of it like a piece of trace paper over an original document. The <cite>source</cite> 
+(the document) remains untouc hed for auditability. Any edits, calculations, 
+or augmentations are written on the <cite>derived_values</cite> (the trace paper). 
+When you ask for a value, the <cite>DataItem</cite> looks at the trace paper first; 
+if nothing is there, it reads from the original document.</p>
+<p><strong>Traceability &amp; Integrity:</strong>
+This architecture ensures that the original raw data is never destroyed or 
+altered by processing logic, which is critical for engineering applications 
+requiring data lineage.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>source</strong> (<em>dict</em>) – Dictionary of raw data for the row.</p></li>
+<li><p><strong>subcontainers</strong> (<em>dict</em><em>[</em><em>str</em><em>, </em><a class="reference internal" href="#tts_data_utils.core.data_container.DataContainer" title="tts_data_utils.core.data_container.DataContainer"><em>DataContainer</em></a><em>]</em><em>, </em><em>optional</em>) – Nested containers attached to this row.</p></li>
+<li><p><strong>copy_data</strong> (<em>bool</em>) – If True, deep-copies the source data to prevent mutation.</p></li>
+<li><p><strong>cast_fields</strong> (<em>bool</em>) – If True, attempts to force fields into canonical datatypes.</p></li>
+<li><p><strong>fill</strong> (<em>bool</em>) – If True, adds None for missing columns defined in DICT_VALID_KEYS.</p></li>
+<li><p><strong>is_django</strong> (<em>bool</em>) – Is the source coming from a Django model?</p></li>
+<li><p><strong>validate</strong> (<em>bool</em>) – Should we raise an exception if fields are the wrong type?</p></li>
+<li><p><strong>default_dispo</strong> (<em>str</em>) – Default disposition object (Dexter only).</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_item.DataItem.DEFAULT_DISPO">
+<span class="sig-name descname"><span class="pre">DEFAULT_DISPO</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#tts_data_utils.core.data_item.DataItem.DEFAULT_DISPO" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_item.DataItem.DO_NOT_DIFF">
+<span class="sig-name descname"><span class="pre">DO_NOT_DIFF</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[]</span></span><a class="headerlink" href="#tts_data_utils.core.data_item.DataItem.DO_NOT_DIFF" title="Link to this definition"></a></dt>
+<dd><p>Fields to ignore in diffs</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_item.DataItem.FLOAT_FORMAT">
+<span class="sig-name descname"><span class="pre">FLOAT_FORMAT</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></span><a class="headerlink" href="#tts_data_utils.core.data_item.DataItem.FLOAT_FORMAT" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_item.DataItem.NAME">
+<span class="sig-name descname"><span class="pre">NAME</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'data</span> <span class="pre">item'</span></span><a class="headerlink" href="#tts_data_utils.core.data_item.DataItem.NAME" title="Link to this definition"></a></dt>
+<dd><p>Name of the data item to be printed in some situations</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_item.DataItem.TIME_FORMAT_PRECISION">
+<span class="sig-name descname"><span class="pre">TIME_FORMAT_PRECISION</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></span><a class="headerlink" href="#tts_data_utils.core.data_item.DataItem.TIME_FORMAT_PRECISION" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_item.DataItem.add_dispo">
+<span class="sig-name descname"><span class="pre">add_dispo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">disposition</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.data_item.DataItem.add_dispo" title="Link to this definition"></a></dt>
+<dd><p>Dexter only, and should be broken out into its own extension if possible.</p>
+<p>Add a disposition to a dexter object.</p>
+<p>TBD. Ask Nick Peper FMI</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>disposition</strong> (<em>Dexter Disposition</em>) – Disposition for whatever has happened to this DataItem</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_item.DataItem.any_batches">
+<span class="sig-name descname"><span class="pre">any_batches</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.data_item.DataItem.any_batches" title="Link to this definition"></a></dt>
+<dd><p>Dexter only, and should be broken out into its own extension if possible.</p>
+<p>TBD. Ask Nick Peper FMI</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_item.DataItem.choose_and_stamp">
+<span class="sig-name descname"><span class="pre">choose_and_stamp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dispo_choice</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dispo_format</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.data_item.DataItem.choose_and_stamp" title="Link to this definition"></a></dt>
+<dd><p>Dexter only, and should be broken out into its own extension if possible.</p>
+<p>Does the same as choose_dispo(), but also stamps the original DataItem with 
+either a string or a list of dispositions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dispo_choice</strong> (<em>DISPO_CHOICE</em>) – FIRST, LAST, ALL</p></li>
+<li><p><strong>dispo_format</strong> (<em>DISPO_FORMATL</em>) – HTML, EXCEL, TEXT</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_item.DataItem.choose_dispo">
+<span class="sig-name descname"><span class="pre">choose_dispo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dispo_choice</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.data_item.DataItem.choose_dispo" title="Link to this definition"></a></dt>
+<dd><p>Dexter only, and should be broken out into its own extension if possible.</p>
+<p>In Dexter, any DataItem can receive many dispositions. This method chooses which to present
+to the user</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>dispo_choice</strong> (<em>DISPO_CHOICE</em>) – How would you like to roll up dispositions? FIST, LAST, ALL?</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_item.DataItem.default_html_cell_styles">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">default_html_cell_styles</span></span><a class="headerlink" href="#tts_data_utils.core.data_item.DataItem.default_html_cell_styles" title="Link to this definition"></a></dt>
+<dd><p>A mapping of keys to CSS styles for individual HTML cells.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_item.DataItem.default_html_row_style">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">default_html_row_style</span></span><a class="headerlink" href="#tts_data_utils.core.data_item.DataItem.default_html_row_style" title="Link to this definition"></a></dt>
+<dd><p>Default CSS styles for an HTML table row.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_item.DataItem.default_rich_text_row_style">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">default_rich_text_row_style</span></span><a class="headerlink" href="#tts_data_utils.core.data_item.DataItem.default_rich_text_row_style" title="Link to this definition"></a></dt>
+<dd><p>Default styles for rich-text terminal output.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_item.DataItem.empty">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">empty</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">keys</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.data_item.DataItem.empty" title="Link to this definition"></a></dt>
+<dd><p>Returns an instance with all columns set to empty strings or None.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_item.DataItem.in_batch">
+<span class="sig-name descname"><span class="pre">in_batch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.data_item.DataItem.in_batch" title="Link to this definition"></a></dt>
+<dd><p>Dexter only, and should be broken out into its own extension if possible.</p>
+<p>TBD. Ask Nick Peper FMI</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>batch</strong> (<em>DataUtils Batch</em>) – Pointer to the data on which a disposition should be checked</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_item.DataItem.new_dispo">
+<span class="sig-name descname"><span class="pre">new_dispo</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.data_item.DataItem.new_dispo" title="Link to this definition"></a></dt>
+<dd><p>Dexter only, and should be broken out into its own extension if possible.</p>
+<p>Add a disposition to a dexter object. Like add_dispo, but just adds an empty disposition.</p>
+<p>TBD. Ask Nick Peper FMI</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_item.DataItem.printable_values">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">printable_values</span></span><a class="headerlink" href="#tts_data_utils.core.data_item.DataItem.printable_values" title="Link to this definition"></a></dt>
+<dd><p>Same as values(), but with formatting applied:
+- TIME_FORMATS used to convert datetimes to strings
+- FLOAT_FORMAT used to format float values (if defined)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_item.DataItem.row_signature">
+<span class="sig-name descname"><span class="pre">row_signature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ignore_cols</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.data_item.DataItem.row_signature" title="Link to this definition"></a></dt>
+<dd><p>Generates a hashable representation of the row.</p>
+<p><strong>Concept:</strong>
+Used to determine if two items are effectively identical. It recursively 
+converts mutable types (lists, dicts) into immutable tuples to ensure 
+the signature can be hashed.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_item.DataItem.stamp">
+<span class="sig-name descname"><span class="pre">stamp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dispo_value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.data_item.DataItem.stamp" title="Link to this definition"></a></dt>
+<dd><p>Dexter only, and should be broken out into its own extension if possible.</p>
+<p>Adds a disposition value to source. Not used in isolation, and should probably be
+made private in a future version</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_item.DataItem.tag_with_batch">
+<span class="sig-name descname"><span class="pre">tag_with_batch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.data_item.DataItem.tag_with_batch" title="Link to this definition"></a></dt>
+<dd><p>Dexter only, and should be broken out into its own extension if possible.</p>
+<p>TBD. Ask Nick Peper FMI</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>batch</strong> (<em>DataUtils Batch</em>) – Pointer to the data on which a disposition should be checked</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_item.DataItem.time">
+<span class="property"><span class="k"><span class="pre">abstract</span></span><span class="w"> </span><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">time</span></span><a class="headerlink" href="#tts_data_utils.core.data_item.DataItem.time" title="Link to this definition"></a></dt>
+<dd><p>Must define some way to time-tag each data item.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_item.DataItem.valid">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">valid</span></span><a class="headerlink" href="#tts_data_utils.core.data_item.DataItem.valid" title="Link to this definition"></a></dt>
+<dd><p>Runs self.validate, but retunds a simple bool instead of a list of invalid records.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_item.DataItem.validate">
+<span class="sig-name descname"><span class="pre">validate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.data_item.DataItem.validate" title="Link to this definition"></a></dt>
+<dd><p>Compares values in each field to those provided in DICT_VALID_KEYS, which must be provided in each extension
+of DataItem.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="tts_data_utils.core.data_item.DataItem.values">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">values</span></span><a class="headerlink" href="#tts_data_utils.core.data_item.DataItem.values" title="Link to this definition"></a></dt>
+<dd><p>Property to return all values, be they from the original source, newly added, or altered.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-tts_data_utils.core.diff">
+<span id="tts-data-utils-core-diff"></span><h3>tts_data_utils.core.diff<a class="headerlink" href="#module-tts_data_utils.core.diff" title="Link to this heading"></a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="tts_data_utils.core.diff.DiffContainer">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">tts_data_utils.core.diff.</span></span><span class="sig-name descname"><span class="pre">DiffContainer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csv_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.diff.DiffContainer" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#tts_data_utils.core.data_container.DataContainer" title="tts_data_utils.core.data_container.DataContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataContainer</span></code></a></p>
+<p>The results object generated by a <cite>DataContainer.diff()</cite> operation.</p>
+<p><strong>The Concept:</strong>
+A <cite>DiffContainer</cite> is a specialized collection that holds <cite>DiffItems</cite>. Its 
+primary purpose is to act as a “Filterable Report.” By default, when you 
+print or view this container, it filters itself to show only the 
+differences (<cite>Same == False</cite>), allowing you to ignore identical data 
+and focus on what changed.</p>
+<p><strong>Usage Note:</strong>
+You generally do not instantiate this class manually. It is returned 
+automatically when you call <cite>.diff()</cite> on any standard <cite>DataContainer</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – The identifier for this diff report.</p></li>
+<li><p><strong>metadata</strong> (<em>dict</em>) – Contextual information about the two containers being compared.</p></li>
+<li><p><strong>csv_path</strong> (<em>str</em><em>, </em><em>optional</em>) – Optional path to load/save the diff results.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tts_data_utils.core.diff.DiffContainer.DATA_ITEM_CLS">
+<span class="sig-name descname"><span class="pre">DATA_ITEM_CLS</span></span><a class="headerlink" href="#tts_data_utils.core.diff.DiffContainer.DATA_ITEM_CLS" title="Link to this definition"></a></dt>
+<dd><p>alias of <a class="reference internal" href="#tts_data_utils.core.diff.DiffItem" title="tts_data_utils.core.diff.DiffItem"><code class="xref py py-class docutils literal notranslate"><span class="pre">DiffItem</span></code></a></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tts_data_utils.core.diff.DiffContainer.DO_NOT_DIFF">
+<span class="sig-name descname"><span class="pre">DO_NOT_DIFF</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['left',</span> <span class="pre">'right']</span></span><a class="headerlink" href="#tts_data_utils.core.diff.DiffContainer.DO_NOT_DIFF" title="Link to this definition"></a></dt>
+<dd><p>Keys to ignore when running self.diff.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tts_data_utils.core.diff.DiffContainer.NAME">
+<span class="sig-name descname"><span class="pre">NAME</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'diff'</span></span><a class="headerlink" href="#tts_data_utils.core.diff.DiffContainer.NAME" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tts_data_utils.core.diff.DiffContainer.is_same">
+<span class="sig-name descname"><span class="pre">is_same</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.diff.DiffContainer.is_same" title="Link to this definition"></a></dt>
+<dd><p>Filters the report to show only matching records.</p>
+<p><strong>Concept:</strong>
+Useful for “sanity checking” to confirm which values were verified 
+as identical.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tts_data_utils.core.diff.DiffContainer.left">
+<span class="sig-name descname"><span class="pre">left</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.diff.DiffContainer.left" title="Link to this definition"></a></dt>
+<dd><p>Retrieves the baseline value for a specific key.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>key</strong> (<em>str</em>) – The field name to look up.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The value from the ‘Left’ side of the comparison.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tts_data_utils.core.diff.DiffContainer.not_same">
+<span class="sig-name descname"><span class="pre">not_same</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.diff.DiffContainer.not_same" title="Link to this definition"></a></dt>
+<dd><p>Filters the report to show only mismatched records.</p>
+<p><strong>Concept:</strong>
+This is the primary troubleshooting view, isolating only the 
+discrepancies between datasets.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="tts_data_utils.core.diff.DiffContainer.repr_cols">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">repr_cols</span></span><a class="headerlink" href="#tts_data_utils.core.diff.DiffContainer.repr_cols" title="Link to this definition"></a></dt>
+<dd><p>Returns the standard list of columns for display.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tts_data_utils.core.diff.DiffContainer.right">
+<span class="sig-name descname"><span class="pre">right</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.diff.DiffContainer.right" title="Link to this definition"></a></dt>
+<dd><p>Retrieves the comparison value for a specific key.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>key</strong> (<em>str</em>) – The field name to look up.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The value from the ‘Right’ side of the comparison.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="tts_data_utils.core.diff.DiffItem">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">tts_data_utils.core.diff.</span></span><span class="sig-name descname"><span class="pre">DiffItem</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subcontainers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">copy_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cast_fields</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fill</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_django</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_dispo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.diff.DiffItem" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#tts_data_utils.core.data_item.DataItem" title="tts_data_utils.core.data_item.DataItem"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataItem</span></code></a></p>
+<p>An individual record representing a field-level comparison between two objects.</p>
+<p><strong>The Concept:</strong>
+Think of a <cite>DiffItem</cite> as a single row in a “Spot the Difference” report. It 
+doesn’t just store a value; it stores the value from the “Left” side, the 
+value from the “Right” side, and a pre-calculated verdict on whether they 
+are identical.</p>
+<p><strong>How it works:</strong>
+When two <cite>DataContainers</cite> are compared, each shared key is packed into a 
+<cite>DiffItem</cite>. If the data types differ between the sides (e.g., comparing a 
+string to an integer), the <cite>Type</cite> field is automatically set to “various” 
+to alert the user of a schema mismatch.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Key</strong> (<em>str</em>) – Name of the attribute or field being compared.</p></li>
+<li><p><strong>Same</strong> (<em>bool</em>) – A boolean flag indicating if Left and Right values match.</p></li>
+<li><p><strong>Type</strong> (<em>str</em>) – The Python data type of the values (or “various”).</p></li>
+<li><p><strong>Left</strong> (<em>int</em><em> | </em><em>float</em><em> | </em><em>str</em><em> | </em><em>None</em>) – The value found in the original (baseline) container.</p></li>
+<li><p><strong>Right</strong> (<em>int</em><em> | </em><em>float</em><em> | </em><em>str</em><em> | </em><em>None</em>) – The value found in the comparison (target) container.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tts_data_utils.core.diff.DiffItem.DICT_VALID_KEYS">
+<span class="sig-name descname"><span class="pre">DICT_VALID_KEYS</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[('Key',</span> <span class="pre">&lt;class</span> <span class="pre">'str'&gt;),</span> <span class="pre">('Same',</span> <span class="pre">&lt;class</span> <span class="pre">'bool'&gt;),</span> <span class="pre">('Type',</span> <span class="pre">&lt;class</span> <span class="pre">'str'&gt;),</span> <span class="pre">('Left',</span> <span class="pre">(&lt;class</span> <span class="pre">'int'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'float'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'str'&gt;,</span> <span class="pre">None)),</span> <span class="pre">('Right',</span> <span class="pre">(&lt;class</span> <span class="pre">'int'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'float'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'str'&gt;,</span> <span class="pre">None))]</span></span><a class="headerlink" href="#tts_data_utils.core.diff.DiffItem.DICT_VALID_KEYS" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tts_data_utils.core.diff.DiffItem.DO_NOT_DIFF">
+<span class="sig-name descname"><span class="pre">DO_NOT_DIFF</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'source':</span> <span class="pre">['left',</span> <span class="pre">'right']}</span></span><a class="headerlink" href="#tts_data_utils.core.diff.DiffItem.DO_NOT_DIFF" title="Link to this definition"></a></dt>
+<dd><p>Fields to ignore in diffs</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tts_data_utils.core.diff.DiffItem.TIME_FORMATS">
+<span class="sig-name descname"><span class="pre">TIME_FORMATS</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></span><a class="headerlink" href="#tts_data_utils.core.diff.DiffItem.TIME_FORMATS" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tts_data_utils.core.diff.DiffItem.time">
+<span class="sig-name descname"><span class="pre">time</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.diff.DiffItem.time" title="Link to this definition"></a></dt>
+<dd><p>[Disabled]</p>
+<p>DiffItems represent logical differences rather than temporal events, 
+so time parsing is disabled by default.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-tts_data_utils.core.generic">
+<span id="tts-data-utils-core-generic"></span><h3>tts_data_utils.core.generic<a class="headerlink" href="#module-tts_data_utils.core.generic" title="Link to this heading"></a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="tts_data_utils.core.generic.GenericContainer">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">tts_data_utils.core.generic.</span></span><span class="sig-name descname"><span class="pre">GenericContainer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">raw_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.generic.GenericContainer" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#tts_data_utils.core.data_container.DataContainer" title="tts_data_utils.core.data_container.DataContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataContainer</span></code></a></p>
+<p>Container provided for hooking into DataContainer infrastructure for which there is
+no extended class.</p>
+<p>Usually this class shouldn’t be used in production, but is nice to have in development,
+especially when prototyping behavior for data types for which you are not certain you
+will want to eventually define an extension.</p>
+<p>Some behavior will be missing without data validation defined, and no default styles
+for html or text repr will be available.</p>
+<p>For parameters, see DataContainer</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tts_data_utils.core.generic.GenericContainer.DATA_ITEM_CLS">
+<span class="sig-name descname"><span class="pre">DATA_ITEM_CLS</span></span><a class="headerlink" href="#tts_data_utils.core.generic.GenericContainer.DATA_ITEM_CLS" title="Link to this definition"></a></dt>
+<dd><p>alias of <a class="reference internal" href="#tts_data_utils.core.generic.GenericItem" title="tts_data_utils.core.generic.GenericItem"><code class="xref py py-class docutils literal notranslate"><span class="pre">GenericItem</span></code></a></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tts_data_utils.core.generic.GenericContainer.NAME">
+<span class="sig-name descname"><span class="pre">NAME</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Generic</span> <span class="pre">Items'</span></span><a class="headerlink" href="#tts_data_utils.core.generic.GenericContainer.NAME" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="tts_data_utils.core.generic.GenericContainer.default_time_label">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">default_time_label</span></span><a class="headerlink" href="#tts_data_utils.core.generic.GenericContainer.default_time_label" title="Link to this definition"></a></dt>
+<dd><p>Returns the primary key used for time-based operations.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="tts_data_utils.core.generic.GenericContainer.repr_cols">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">repr_cols</span></span><a class="headerlink" href="#tts_data_utils.core.generic.GenericContainer.repr_cols" title="Link to this definition"></a></dt>
+<dd><p>Columns to be used for representations (terminal, HTML, etc.).</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="tts_data_utils.core.generic.GenericItem">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">tts_data_utils.core.generic.</span></span><span class="sig-name descname"><span class="pre">GenericItem</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subcontainers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">copy_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cast_fields</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fill</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_django</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_dispo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.generic.GenericItem" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#tts_data_utils.core.data_item.DataItem" title="tts_data_utils.core.data_item.DataItem"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataItem</span></code></a></p>
+<p>DataItem to go with GenericContainer</p>
+<p>No validation requirements on these items.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tts_data_utils.core.generic.GenericItem.DICT_VALID_KEYS">
+<span class="sig-name descname"><span class="pre">DICT_VALID_KEYS</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[]</span></span><a class="headerlink" href="#tts_data_utils.core.generic.GenericItem.DICT_VALID_KEYS" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tts_data_utils.core.generic.GenericItem.NAME">
+<span class="sig-name descname"><span class="pre">NAME</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Generic</span> <span class="pre">Data</span> <span class="pre">Item'</span></span><a class="headerlink" href="#tts_data_utils.core.generic.GenericItem.NAME" title="Link to this definition"></a></dt>
+<dd><p>Name of the data item to be printed in some situations</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tts_data_utils.core.generic.GenericItem.TIME_FORMATS">
+<span class="sig-name descname"><span class="pre">TIME_FORMATS</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></span><a class="headerlink" href="#tts_data_utils.core.generic.GenericItem.TIME_FORMATS" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="tts_data_utils.core.generic.GenericItem.default_html_row_style">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">default_html_row_style</span></span><a class="headerlink" href="#tts_data_utils.core.generic.GenericItem.default_html_row_style" title="Link to this definition"></a></dt>
+<dd><p>Default CSS styles for an HTML table row.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="tts_data_utils.core.generic.GenericItem.time">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">time</span></span><a class="headerlink" href="#tts_data_utils.core.generic.GenericItem.time" title="Link to this definition"></a></dt>
+<dd><p>Must define some way to time-tag each data item.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="tts_data_utils.core.generic.GenericItem.time_str">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">time_str</span></span><a class="headerlink" href="#tts_data_utils.core.generic.GenericItem.time_str" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-tts_data_utils.core.lorem_utils">
+<span id="tts-data-utils-core-lorem-utils"></span><h3>tts_data_utils.core.lorem_utils<a class="headerlink" href="#module-tts_data_utils.core.lorem_utils" title="Link to this heading"></a></h3>
+<p>Utilities for generating lorem ipsum dummy data for DataContainer instances.</p>
+<p>This module provides functions to generate realistic dummy data based on
+the structure defined in a DataItem class.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="tts_data_utils.core.lorem_utils.generate_lorem_data_for_item">
+<span class="sig-prename descclassname"><span class="pre">tts_data_utils.core.lorem_utils.</span></span><span class="sig-name descname"><span class="pre">generate_lorem_data_for_item</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_item_cls</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_records</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.lorem_utils.generate_lorem_data_for_item" title="Link to this definition"></a></dt>
+<dd><p>Generate lorem ipsum data for a specific DataItem class.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>data_item_cls: The DataItem class to generate data for
+num_records: Number of records to generate</p>
+</dd>
+<dt>Returns:</dt><dd><p>List of dictionaries with dummy data matching the DataItem structure</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tts_data_utils.core.lorem_utils.generate_lorem_text">
+<span class="sig-prename descclassname"><span class="pre">tts_data_utils.core.lorem_utils.</span></span><span class="sig-name descname"><span class="pre">generate_lorem_text</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">min_words</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_words</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.lorem_utils.generate_lorem_text" title="Link to this definition"></a></dt>
+<dd><p>Generate lorem ipsum text with a random number of words.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tts_data_utils.core.lorem_utils.generate_smart_value">
+<span class="sig-prename descclassname"><span class="pre">tts_data_utils.core.lorem_utils.</span></span><span class="sig-name descname"><span class="pre">generate_smart_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_spec</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.lorem_utils.generate_smart_value" title="Link to this definition"></a></dt>
+<dd><p>Generate a value for a specific key, using naming conventions to create more realistic data.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>key: The field name
+type_spec: The type specification</p>
+</dd>
+<dt>Returns:</dt><dd><p>A value appropriate for the field name and type</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tts_data_utils.core.lorem_utils.generate_value_for_type">
+<span class="sig-prename descclassname"><span class="pre">tts_data_utils.core.lorem_utils.</span></span><span class="sig-name descname"><span class="pre">generate_value_for_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type_spec</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.lorem_utils.generate_value_for_type" title="Link to this definition"></a></dt>
+<dd><p>Generate a random value that matches the given type specification.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>type_spec: A type or tuple of types (from DICT_VALID_KEYS)</p>
+</dd>
+<dt>Returns:</dt><dd><p>A random value of the appropriate type</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-tts_data_utils.core.visual_diff">
+<span id="tts-data-utils-core-visual-diff"></span><h3>tts_data_utils.core.visual_diff<a class="headerlink" href="#module-tts_data_utils.core.visual_diff" title="Link to this heading"></a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="tts_data_utils.core.visual_diff.VisualDiffContainer">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">tts_data_utils.core.visual_diff.</span></span><span class="sig-name descname"><span class="pre">VisualDiffContainer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">raw_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.visual_diff.VisualDiffContainer" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#tts_data_utils.core.data_container.DataContainer" title="tts_data_utils.core.data_container.DataContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataContainer</span></code></a></p>
+<p>A collection of VisualDiffItems, representing a full comparison report.</p>
+<p><strong>Concept:</strong>
+The <cite>VisualDiffContainer</cite> acts as the manager for a set of diffed records. It 
+distinguishes between “Display” columns (what the user needs to see) and 
+“Metadata” columns (the internal flags used to calculate differences).</p>
+<p><strong>Usage Note:</strong>
+By default, any column starting with an underscore (<cite>_</cite>) is treated as internal 
+metadata and is hidden from the standard <cite>repr_cols</cite> view, though it remains 
+accessible for CSV exports and logic processing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>raw_data</strong> (<em>list</em><em>[</em><em>dict</em><em>]</em>) – A list of dictionaries representing the diffed rows.</p></li>
+<li><p><strong>name</strong> (<em>str</em><em>, </em><em>optional</em>) – The name of the container/report. Defaults to ‘Generic Container’.</p></li>
+<li><p><strong>kwargs</strong> – Additional arguments passed to the parent <cite>DataContainer</cite>.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tts_data_utils.core.visual_diff.VisualDiffContainer.DATA_ITEM_CLS">
+<span class="sig-name descname"><span class="pre">DATA_ITEM_CLS</span></span><a class="headerlink" href="#tts_data_utils.core.visual_diff.VisualDiffContainer.DATA_ITEM_CLS" title="Link to this definition"></a></dt>
+<dd><p>alias of <a class="reference internal" href="#tts_data_utils.core.visual_diff.VisualDiffItem" title="tts_data_utils.core.visual_diff.VisualDiffItem"><code class="xref py py-class docutils literal notranslate"><span class="pre">VisualDiffItem</span></code></a></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tts_data_utils.core.visual_diff.VisualDiffContainer.NAME">
+<span class="sig-name descname"><span class="pre">NAME</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Visual</span> <span class="pre">Diff</span> <span class="pre">Container'</span></span><a class="headerlink" href="#tts_data_utils.core.visual_diff.VisualDiffContainer.NAME" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="tts_data_utils.core.visual_diff.VisualDiffContainer.default_time_label">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">default_time_label</span></span><a class="headerlink" href="#tts_data_utils.core.visual_diff.VisualDiffContainer.default_time_label" title="Link to this definition"></a></dt>
+<dd><p>The primary time-based column label used for sorting or indexing.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="tts_data_utils.core.visual_diff.VisualDiffContainer.repr_cols">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">repr_cols</span></span><a class="headerlink" href="#tts_data_utils.core.visual_diff.VisualDiffContainer.repr_cols" title="Link to this definition"></a></dt>
+<dd><p>The list of columns intended for visual display (excludes internal metadata).</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="tts_data_utils.core.visual_diff.VisualDiffItem">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">tts_data_utils.core.visual_diff.</span></span><span class="sig-name descname"><span class="pre">VisualDiffItem</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subcontainers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">copy_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cast_fields</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fill</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_django</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_dispo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tts_data_utils.core.visual_diff.VisualDiffItem" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#tts_data_utils.core.data_item.DataItem" title="tts_data_utils.core.data_item.DataItem"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataItem</span></code></a></p>
+<p>A specialized data record designed for side-by-side comparison.</p>
+<p><strong>The Concept:</strong>
+When comparing two versions of a dataset (a “Diff”), we don’t just care about the 
+raw values—we care about the <em>state</em> of each row relative to its counterpart. 
+Is it new? Was it deleted? Was it modified?</p>
+<p>A <cite>VisualDiffItem</cite> carries the data values along with metadata (prefixed with <cite>_visdiff</cite>) 
+that tells a renderer exactly how to style the row (e.g., green for an insert, 
+red for a delete) to make differences immediately obvious to a human reviewer.</p>
+<p><strong>Styling Logic:</strong>
+* <strong>Row Level:</strong> The entire background color is determined by the <cite>_visdiff_match</cite> status.
+* <strong>Cell Level:</strong> Individual cells are highlighted if their specific key exists in</p>
+<blockquote>
+<div><p>the <cite>_mismatched_keys</cite> list.</p>
+</div></blockquote>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tts_data_utils.core.visual_diff.VisualDiffItem.DICT_VALID_KEYS">
+<span class="sig-name descname"><span class="pre">DICT_VALID_KEYS</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[('_visdiff_index',</span> <span class="pre">(&lt;class</span> <span class="pre">'int'&gt;,</span> <span class="pre">None)),</span> <span class="pre">('_visdiff_match',</span> <span class="pre">(&lt;class</span> <span class="pre">'str'&gt;,</span> <span class="pre">None)),</span> <span class="pre">('_mismatched_keys',</span> <span class="pre">&lt;class</span> <span class="pre">'list'&gt;)]</span></span><a class="headerlink" href="#tts_data_utils.core.visual_diff.VisualDiffItem.DICT_VALID_KEYS" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tts_data_utils.core.visual_diff.VisualDiffItem.MATCH_STATUS_COLORS">
+<span class="sig-name descname"><span class="pre">MATCH_STATUS_COLORS</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'delete':</span> <span class="pre">{'background-color':</span> <span class="pre">'#FF614A',</span> <span class="pre">'color':</span> <span class="pre">'#333333'},</span> <span class="pre">'empty_from_delete':</span> <span class="pre">{'background-color':</span> <span class="pre">'#BDBEBD',</span> <span class="pre">'color':</span> <span class="pre">'#BDBEBD'},</span> <span class="pre">'empty_from_insert':</span> <span class="pre">{'background-color':</span> <span class="pre">'#BDBEBD',</span> <span class="pre">'color':</span> <span class="pre">'#BDBEBD'},</span> <span class="pre">'equal':</span> <span class="pre">{'background-color':</span> <span class="pre">'#FFFFF',</span> <span class="pre">'color':</span> <span class="pre">'#333333'},</span> <span class="pre">'insert':</span> <span class="pre">{'background-color':</span> <span class="pre">'#95FB95',</span> <span class="pre">'color':</span> <span class="pre">'#333333'},</span> <span class="pre">'replace':</span> <span class="pre">{'background-color':</span> <span class="pre">'#ADC4DF',</span> <span class="pre">'color':</span> <span class="pre">'#333333'},</span> <span class="pre">'unmatched':</span> <span class="pre">{'background-color':</span> <span class="pre">'#FF614A',</span> <span class="pre">'color':</span> <span class="pre">'#333333'}}</span></span><a class="headerlink" href="#tts_data_utils.core.visual_diff.VisualDiffItem.MATCH_STATUS_COLORS" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tts_data_utils.core.visual_diff.VisualDiffItem.NAME">
+<span class="sig-name descname"><span class="pre">NAME</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Generic</span> <span class="pre">Data</span> <span class="pre">Item'</span></span><a class="headerlink" href="#tts_data_utils.core.visual_diff.VisualDiffItem.NAME" title="Link to this definition"></a></dt>
+<dd><p>Name of the data item to be printed in some situations</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tts_data_utils.core.visual_diff.VisualDiffItem.PALETTE">
+<span class="sig-name descname"><span class="pre">PALETTE</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'blue':</span> <span class="pre">{'background-color':</span> <span class="pre">'#ADC4DF',</span> <span class="pre">'color':</span> <span class="pre">'#333333'},</span> <span class="pre">'error':</span> <span class="pre">{'background-color':</span> <span class="pre">'#000000',</span> <span class="pre">'color':</span> <span class="pre">'#FF614A'},</span> <span class="pre">'green':</span> <span class="pre">{'background-color':</span> <span class="pre">'#95FB95',</span> <span class="pre">'color':</span> <span class="pre">'#333333'},</span> <span class="pre">'grey':</span> <span class="pre">{'background-color':</span> <span class="pre">'#BDBEBD',</span> <span class="pre">'color':</span> <span class="pre">'#BDBEBD'},</span> <span class="pre">'red':</span> <span class="pre">{'background-color':</span> <span class="pre">'#FF614A',</span> <span class="pre">'color':</span> <span class="pre">'#333333'},</span> <span class="pre">'white':</span> <span class="pre">{'background-color':</span> <span class="pre">'#FFFFF',</span> <span class="pre">'color':</span> <span class="pre">'#333333'}}</span></span><a class="headerlink" href="#tts_data_utils.core.visual_diff.VisualDiffItem.PALETTE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tts_data_utils.core.visual_diff.VisualDiffItem.TIME_FORMATS">
+<span class="sig-name descname"><span class="pre">TIME_FORMATS</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'Time':</span> <span class="pre">'%Y-%jT%H:%M:%S.%f'}</span></span><a class="headerlink" href="#tts_data_utils.core.visual_diff.VisualDiffItem.TIME_FORMATS" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="tts_data_utils.core.visual_diff.VisualDiffItem.default_html_cell_styles">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">default_html_cell_styles</span></span><a class="headerlink" href="#tts_data_utils.core.visual_diff.VisualDiffItem.default_html_cell_styles" title="Link to this definition"></a></dt>
+<dd><p>Returns a mapping of column keys to CSS styles, highlighting specific 
+mismatched cells.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="tts_data_utils.core.visual_diff.VisualDiffItem.default_html_row_style">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">default_html_row_style</span></span><a class="headerlink" href="#tts_data_utils.core.visual_diff.VisualDiffItem.default_html_row_style" title="Link to this definition"></a></dt>
+<dd><p>Returns the CSS style dictionary for the table row based on the match status.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="tts_data_utils.core.visual_diff.VisualDiffItem.time">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">time</span></span><a class="headerlink" href="#tts_data_utils.core.visual_diff.VisualDiffItem.time" title="Link to this definition"></a></dt>
+<dd><p>Returns the native time object for the item.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="tts_data_utils.core.visual_diff.VisualDiffItem.time_str">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">time_str</span></span><a class="headerlink" href="#tts_data_utils.core.visual_diff.VisualDiffItem.time_str" title="Link to this definition"></a></dt>
+<dd><p>Returns a formatted string representation of the item’s timestamp.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="tts_data_utils.html" class="btn btn-neutral float-left" title="tts_data_utils" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="tts_data_utils.invulnerable_data_manager.html" class="btn btn-neutral float-right" title="tts_data_utils.invulnerable_data_manager" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026 JPL.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
