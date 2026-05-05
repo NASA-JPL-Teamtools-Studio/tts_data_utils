@@ -51,10 +51,7 @@ class VisualDiffItem(DataItem):
         """
         Returns the CSS style dictionary for the table row based on the match status.
         """
-        try:
-            return VisDiffPalette[self['_visdiff_match']]
-        except:
-            import pdb; pdb.set_trace()
+        return VisDiffPalette()[self['_visdiff_match']]
     @property
     def default_html_cell_styles(self):
         """
