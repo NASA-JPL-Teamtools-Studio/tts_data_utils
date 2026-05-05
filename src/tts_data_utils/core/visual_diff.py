@@ -8,7 +8,7 @@ from jpl_time import Time
 from jpl_time.jpl_time import TimeConversionError
 
 #Teamtool Studio Imports
-# None
+from tts_html_utils.core.palette import VisDiffPalette
 
 #This Library Imports
 from tts_data_utils.core.data_container import DataContainer
@@ -33,26 +33,6 @@ class VisualDiffItem(DataItem):
       the `_mismatched_keys` list.
     """
 
-    PALETTE = {
-        'green': {'background-color': '#95FB95', 'color': '#333333'},
-        'blue': {'background-color': '#ADC4DF', 'color': '#333333'},
-        'grey': {'background-color': '#BDBEBD', 'color': '#BDBEBD'},
-        'red': {'background-color': '#FF614A', 'color': '#333333'},
-        'white': {'background-color': '#FFFFF', 'color': '#333333'},
-        'error': {'background-color': '#000000', 'color': '#FF614A'}
-        }
-
-
-    MATCH_STATUS_COLORS = {
-        'insert':   PALETTE['green'],
-        'replace':  PALETTE['blue'],
-        'delete':   PALETTE['red'],
-        'equal':    PALETTE['white'],
-        'empty_from_delete':  PALETTE['grey'], 
-        'empty_from_insert': PALETTE['grey'],
-        'unmatched': PALETTE['red'],
-    }
-
     DICT_VALID_KEYS = [
         ('_visdiff_index', (int, None)),
         ('_visdiff_match', (str, None)),
@@ -71,7 +51,7 @@ class VisualDiffItem(DataItem):
         """
         Returns the CSS style dictionary for the table row based on the match status.
         """
-        return self.MATCH_STATUS_COLORS[self['_visdiff_match']]
+        return VisDiffPalette[self['_visdiff_match']]
 
     @property
     def default_html_cell_styles(self):

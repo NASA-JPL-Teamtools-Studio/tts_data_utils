@@ -238,7 +238,7 @@ class DataContainer(ABC):
         table_builder = DocxTable(template, self.records, headers=self._repr_cols, row_styles=[r.default_rich_text_row_style for r in self.records])
         return table_builder.render()
 
-    def power_table(self, superheader=None, columns=None, bypass_styles=False, row_styles=None, cell_styles=None, **kwargs):
+    def power_table(self, superheader=None, columns=None, bypass_styles=False, row_styles=None, cell_styles=None, expand_blocks='subcontainers', add_filters=None, add_sorting=None, **kwargs):
         """
         Produce a rich, interactive HTML table representation of this DataContainer.
 
@@ -257,12 +257,27 @@ class DataContainer(ABC):
         :type row_styles: list[dict[str, str]]
         :param cell_styles: Custom CSS for each cell. Must match `self.records` length.
         :type cell_styles: list[list[dict[str, str]]]
-        :param kwargs: Passthrough arguments for PowerTable (e.g., `id`, `add_filters`).
+        :param expand_blocks: Controls how nested content is rendered. If 'subcontainers', 
+                              automatically expands all subcontainers. Otherwise, provide a list 
+                              of HtmlComponent objects matching the length of `self.records` to 
+                              explicitly define expandable content for each row.
+        :type expand_blocks: str | list[HtmlComponent]
+        :param add_filters: Enable column filtering. Options: 'local', 'django', or None.
+        :type add_filters: str, optional
+        :param add_sorting: Enable column sorting. Options: 'local', 'django', or None.
+        :type add_sorting: str, optional
+        :param kwargs: Additional passthrough arguments for PowerTable (e.g., `id`, `class_name`).
         :return: A rendered PowerTable component.
+
         """
 
         # TO DO: Rethink how we handle repr_cols here when you're not so braindead
-        row_data = [(r.values, [subcontainer_obj.power_table(subcontainer_name) for subcontainer_name, subcontainer_obj in r.subcontainers.items()]) for r in self.records]
+        if expand_blocks == 'subcontainers':
+            row_data = [(r.values, [subcontainer_obj.power_table(subcontainer_name) for subcontainer_name, subcontainer_obj in r.subcontainers.items()]) for r in self.records]
+        else:
+            if len(self.records) != len(expand_blocks):
+                raise ValueError("The number of expand blocks must match the number of records")
+            row_data = [(r.values, e) for r, e in zip(self.records, expand_blocks)]
 
         if columns is not None:
             repr_cols = columns
@@ -296,6 +311,8 @@ class DataContainer(ABC):
             row_data=row_data,
             row_styles=row_styles,
             cell_styles=cell_styles,
+            add_filters=add_filters,
+            add_sorting=add_sorting,
             **kwargs
             )
         if superheader:
@@ -1696,11 +1713,12 @@ class DataContainer(ABC):
         records_copy = copy(self.records)
         if by is None and lam is None: 
             by = self.default_time_label
-            records_copy.sort(key=lambda r: r.source[by], reverse=reverse)
+            records_copy.sort(key=lambda r: r.source[by] if r.source[by] is not None else '', reverse=reverse)
         elif lam is not None:
             records_copy.sort(key=lam, reverse=reverse)
         else:
-            records_copy.sort(key=lambda r: r.values[by], reverse=reverse)
+            # Handle None values by treating them as empty strings for sorting
+            records_copy.sort(key=lambda r: r.values.get(by, '') if r.values.get(by) is not None else '', reverse=reverse)
         return self._copy(records_copy)
         
     def append(self, items, cast_fields=False, fill=False):

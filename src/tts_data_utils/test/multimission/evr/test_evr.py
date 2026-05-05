@@ -24,6 +24,8 @@ class TestEvrGaps:
         evrs.gaps().to_csv(TEST_OUTPUT_DIR.joinpath('actual_evr_gaps.csv'))
 
         expected_evr_gaps.diff(evrs.gaps())
+        import pdb
+        pdb.set_trace()
         assert len(expected_evr_gaps.diff(evrs.gaps()).eq('Same', False)) == 0
         assert len(expected_evr_gaps.diff(evrs.gaps())) == 236
 
