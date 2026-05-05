@@ -5,21 +5,12 @@ from datetime import datetime
 
 #JPL Imports
 from jpl_time import Time
+from tts_html_utils.core.palette import EvrPalette
 
 #This Library Imports
 from tts_data_utils.core.data_container import DataContainer
 from tts_data_utils.core.data_item import DataItem
 
-EVR_LEVEL_COLORS = {
-    'DIAGNOSTIC':  {'background-color': '#90ED91', 'color': '#333333'},
-    'COMMAND':     {'background-color': '#0D00FF', 'color': '#F1F1F2'},
-    'ACTIVITY_LO': {'background-color': '#D3D3D3', 'color': '#333333'},
-    'ACTIVITY_HI': {'background-color': '#666666', 'color': '#F1F1F2'},
-    'WARNING_LO':  {'background-color': '#F0F001', 'color': '#333333'},
-    'WARNING_HI':  {'background-color': '#FEA500', 'color': '#333333'},
-    'FATAL':       {'background-color': '#FF5E66', 'color': '#F1F1F2'} ,
-    'SIM ERROR':       {'background-color': '#FF5E66', 'color': '#F1F1F2'} 
-}
 
 class EvrItem(DataItem):
     """
@@ -94,7 +85,7 @@ class EvrItem(DataItem):
     @property
     def default_html_row_style(self):
         """Returns row styling based on the EVR severity level."""
-        return EVR_LEVEL_COLORS[self.level]
+        return EvrPalette[self.level]
     
     @property
     def time(self):
@@ -278,7 +269,7 @@ class EvrGapItem(DataItem):
     @property
     def default_html_row_style(self):
         """Styles the row based on the severity of the missing EVRs."""
-        return EVR_LEVEL_COLORS[self.level]
+        return EvrPalette[self.level]
     
     @property
     def time(self):
