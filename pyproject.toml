@@ -12,6 +12,7 @@ classifiers = [
   "License :: OSI Approved :: Apache Software License",
 ]
 dependencies = [
+    "lark>=1.0.0",
     "docxtpl",
     "pandas",
     "pytest",
