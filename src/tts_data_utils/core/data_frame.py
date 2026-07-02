@@ -502,6 +502,7 @@ class TtsDataFrame(pd.DataFrame):
         label_col=None,
         value_col=None,
         index_col=None,
+        append=False,
     ) -> 'TtsDataFrame':
         """Compute a derived label from a math expression over existing labels.
 
@@ -614,8 +615,18 @@ class TtsDataFrame(pd.DataFrame):
                 rows.append({index_col: t, label_col: derived_name, value_col: result})
 
         if not rows:
+            if append:
+                return self.copy()
             return type(self)(validate=False, coerce=False)
-        return type(self)(rows, validate=False, coerce=False)
+
+        derived_df = type(self)(rows, validate=False, coerce=False)
+
+        if append:
+            combined = pd.concat([self, derived_df], ignore_index=True, sort=False)
+            return type(self)(combined, name=self.name, metadata=self.metadata,
+                              coerce=False, validate=False)
+
+        return derived_df
 
     def _apply_schema(self, coerce: bool, validate: bool) -> None:
         
