@@ -590,10 +590,7 @@ class TtsDataFrame(pd.DataFrame):
             }
             for t in common_times:
                 slot = {lbl: lookup[lbl][t] for lbl in parsed.labels}
-                try:
-                    result = parsed.eval(slot)
-                except _MathExprError:
-                    continue
+                result = parsed.eval(slot)
                 rows.append({index_col: t, label_col: derived_name, value_col: result})
         else:
             all_times = sorted({t for times, _ in label_data.values() for t in times})
@@ -608,10 +605,7 @@ class TtsDataFrame(pd.DataFrame):
                     slot[lbl] = v
                 if not valid:
                     continue
-                try:
-                    result = parsed.eval(slot)
-                except _MathExprError:
-                    continue
+                result = parsed.eval(slot)
                 rows.append({index_col: t, label_col: derived_name, value_col: result})
 
         if not rows:
