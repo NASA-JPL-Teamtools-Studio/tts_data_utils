@@ -191,6 +191,11 @@ class _MathTransformer(lark.Transformer):
     def float_val(self, tok): return float(tok)
 
     @lark.v_args(inline=True)
+    def string_val(self, tok):
+        # Strip surrounding quotes from the STRING token
+        return str(tok)[1:-1]
+
+    @lark.v_args(inline=True)
     def column(self, tok):
         name = str(tok)
         if name not in self._values:
@@ -198,11 +203,15 @@ class _MathTransformer(lark.Transformer):
         return self._values[name]
 
     @lark.v_args(inline=True)
-    def func_call(self, name_tok, val):
+    def func_call(self, name_tok, *args):
         fname = str(name_tok)
-        if fname not in self._FUNCS:
+        func = self._FUNCS.get(fname)
+        if func is None:
             raise _MathExprError(f"Unknown function {fname!r}")
-        return self._FUNCS[fname](val)
+        try:
+            return func(*args)
+        except Exception as e:  # pragma: no cover - defensive
+            raise _MathExprError(f"Error in function {fname!r}: {e}") from e
 
     @lark.v_args(inline=True)
     def add(self, l, r): return l + r
@@ -222,11 +231,43 @@ class _MathTransformer(lark.Transformer):
     @lark.v_args(inline=True)
     def pow_(self, base, exp): return base ** exp
 
+    # Comparison operators
+
+    @lark.v_args(inline=True)
+    def gt(self, l, r): return l > r
+
+    @lark.v_args(inline=True)
+    def ge(self, l, r): return l >= r
+
+    @lark.v_args(inline=True)
+    def lt(self, l, r): return l < r
+
+    @lark.v_args(inline=True)
+    def le(self, l, r): return l <= r
+
+    @lark.v_args(inline=True)
+    def eq(self, l, r): return l == r
+
+    @lark.v_args(inline=True)
+    def ne(self, l, r): return l != r
+
+    # Boolean combinators (operate on scalar booleans)
+
+    @lark.v_args(inline=True)
+    def and_(self, l, r): return l and r
+
+    @lark.v_args(inline=True)
+    def or_(self, l, r): return l or r
+
+    @lark.v_args(inline=True)
+    def not_(self, v): return not v
+
 
 class _ParsedMath:
 
-    def __init__(self, tree):
+    def __init__(self, tree, transformer_cls):
         self._tree = tree
+        self._transformer_cls = transformer_cls
         self.labels = list(dict.fromkeys(
             str(subtree.children[0])
             for subtree in tree.iter_subtrees()
@@ -235,7 +276,7 @@ class _ParsedMath:
 
     def eval(self, values):
         try:
-            return _MathTransformer(values).transform(self._tree)
+            return self._transformer_cls(values).transform(self._tree)
         except lark.exceptions.VisitError as e:
             raise e.orig_exc
 
@@ -249,37 +290,67 @@ class _MathEngine:
         %import common (SIGNED_INT, SIGNED_FLOAT)
         %import common.CNAME -> NAME
 
+        STRING:     "\"" /[^\"]*/ "\"" | "'" /[^']*/ "'"
+
         ?start: expr
 
-        ?expr: add_expr
+        # Lowest precedence: boolean OR
+        ?expr: or_expr
+
+        ?or_expr: and_expr
+            | or_expr "or" and_expr   -> or_
+
+        ?and_expr: cmp_expr
+            | and_expr "and" cmp_expr -> and_
+
+        ?cmp_expr: add_expr
+            | add_expr ">"  add_expr  -> gt
+            | add_expr ">=" add_expr  -> ge
+            | add_expr "<"  add_expr  -> lt
+            | add_expr "<=" add_expr  -> le
+            | add_expr "==" add_expr  -> eq
+            | add_expr "!=" add_expr  -> ne
 
         ?add_expr: mul_expr
-            | add_expr "+" mul_expr  -> add
-            | add_expr "-" mul_expr  -> sub
+            | add_expr "+" mul_expr   -> add
+            | add_expr "-" mul_expr   -> sub
 
         ?mul_expr: unary_expr
             | mul_expr "*" unary_expr -> mul
             | mul_expr "/" unary_expr -> div
 
         ?unary_expr: power_expr
-            | "-" unary_expr         -> neg
+            | "-" unary_expr          -> neg
+            | "not" unary_expr        -> not_
 
         ?power_expr: atom
-            | atom "**" unary_expr   -> pow_
+            | atom "**" unary_expr    -> pow_
 
         ?atom: SIGNED_INT              -> int_val
             | SIGNED_FLOAT             -> float_val
-            | NAME "(" expr ")"        -> func_call
+            | STRING                   -> string_val
+            | NAME "(" [expr ("," expr)*] ")" -> func_call
             | NAME                     -> column
             | "(" expr ")"
     """, parser='lalr')
 
-    def parse(self, expr: str) -> _ParsedMath:
+    def parse(self, expr: str, transformer_cls=_MathTransformer) -> _ParsedMath:
+        """Parse an expression into a tree bound to the given transformer.
+
+        Parameters
+        ----------
+        expr : str
+            The expression to parse.
+        transformer_cls : type
+            A subclass of :class:`_MathTransformer` that will be used to
+            evaluate the expression tree. Defaults to the core
+            :class:`_MathTransformer`.
+        """
         try:
             tree = self._parser.parse(expr)
         except lark.UnexpectedInput as e:
             raise _MathExprError(f"Invalid math expression: {expr!r}") from e
-        return _ParsedMath(tree)
+        return _ParsedMath(tree, transformer_cls)
 
 
 _math_engine = _MathEngine()

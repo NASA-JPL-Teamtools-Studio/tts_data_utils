@@ -7,7 +7,7 @@ from datetime import datetime
 from tts_dante.interpolators.interpolators import StepInterpolator
 from tts_data_utils.core.expr_engines import (
     _FilterExprError, _filter_engine,
-    _MathExprError, _math_engine,
+    _MathExprError, _math_engine, _MathTransformer,
 )
 
 class _TimerProxy:
@@ -118,6 +118,16 @@ class TtsDataFrame(pd.DataFrame):
     LABEL_COLUMN = None
 
     SUBCONTAINER_KEY = None
+
+    # Expression engine configuration.
+    #
+    #  - MATH_ENGINE: shared parser/grammar singleton (kept for backward
+    #    compatibility; normally you should not override this).
+    #  - MATH_TRANSFORMER: transformer class used to evaluate parsed math
+    #    expressions. Subclasses override this to customize semantics while
+    #    reusing the core grammar.
+    MATH_ENGINE = _math_engine
+    MATH_TRANSFORMER = _MathTransformer
 
     def __init__(self, *args, name=None, metadata=None, coerce=None, validate=None, csv_path=None, **kwargs):
         # Pull container-style metadata and validation flags out of kwargs
@@ -549,7 +559,8 @@ class TtsDataFrame(pd.DataFrame):
         derived_name, rhs = expr.split('=', 1)
         derived_name = derived_name.strip()
 
-        parsed = _math_engine.parse(rhs.strip())
+        # Parse using the shared math engine and this class's transformer.
+        parsed = self.MATH_ENGINE.parse(rhs.strip(), transformer_cls=self.MATH_TRANSFORMER)
 
         grouped = self.groupby(label_col)
         label_data = {}
