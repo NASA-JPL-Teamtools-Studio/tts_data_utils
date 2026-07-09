@@ -14,6 +14,7 @@ import re
 import sys
 from tabulate import tabulate
 from itertools import product
+import snakemd
 
 #JPL Imports
 from tts_html_utils.core.components.table import PowerTable
@@ -1766,6 +1767,33 @@ class DataContainer(ABC):
         """Placeholder for breaking tests. One day at a time here..."""
         return
 
+    def to_md_string(self):
+        """
+        Returns the container's records as a Markdown string.
+        """
+        md_doc = snakemd.new_doc()
+        headers = list(self.records[0].printable_values.keys()) if self.records else []
+        rows = [list(r.printable_values.values()) for r in self.records]
+        if headers or rows:
+            md_doc.add_table(headers, rows)
+        return str(md_doc)
+
+
+    def to_md(self, file_path, mkdirs=False):
+        """
+        Writes the container's records to a Markdown file.
+        
+        :param file_path: Target file path for the Markdown output.
+        :param mkdirs: If True, creates the target directory if it does not exist.
+        """
+        if mkdirs:
+            Path(file_path).parent.mkdir(parents=True, exist_ok=True)
+        
+        md_string = self.to_md_string()
+        
+        with open(file_path, 'w') as f:
+            f.write(md_string)
+
     def to_csv(self, csv_path, mkdirs=False):        
         """
         Writes the container's records to a CSV file.
@@ -1803,6 +1831,7 @@ class DataContainer(ABC):
         if mkdirs: os.makedirs(os.path.dirname(csv_path), exist_ok=True)
         
         df.to_csv(csv_path, index=False, date_format=None)
+
     def read_csv(self, csv_path):
         """Reads a CSV file into a list of record dictionaries."""
         return pd.read_csv(csv_path).to_dict('records')
