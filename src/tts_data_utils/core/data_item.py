@@ -41,8 +41,6 @@ class DataItem(ABC):
     :type cast_fields: bool
     :param fill: If True, adds None for missing columns defined in DICT_VALID_KEYS.
     :type fill: bool
-    :param is_django: Is the source coming from a Django model?
-    :type is_django: bool
     :param validate: Should we raise an exception if fields are the wrong type?
     :type validate: bool
     :param default_dispo: Default disposition object (Dexter only).
@@ -67,12 +65,9 @@ class DataItem(ABC):
     else:
         DEFAULT_DISPO = None
         
-    def __init__(self, source, subcontainers=None, copy_data=False, cast_fields=False, fill=False, is_django=False, validate=True, default_dispo=None):
+    def __init__(self, source, subcontainers=None, copy_data=False, cast_fields=False, fill=False, validate=True, default_dispo=None):
         # Save off a copy of the source data
-        if is_django:
-            self.source = {self.DJANGO_KEY_MAP[k]: source.__dict__[k] for k in source.__dict__.keys() if not k.startswith('_')}
-        else:
-            self.source = deepcopy(source) if copy_data else source
+        self.source = deepcopy(source) if copy_data else source
 
         self.subcontainers = subcontainers if subcontainers is not None else {}
 

@@ -102,8 +102,6 @@ class DataContainer(ABC):
     :type csv_path: Path | str, optional
     :param xlsx_path: Path for XLSX to be transformed into DataContainer.
     :type xlsx_path: Path | str, optional
-    :param django_records: Django object containing data to be transformed.
-    :type django_records: QuerySet, optional
     :param metadata: Arbitrary user information to be carried with the container.
     :type metadata: dict, optional
     :param name: Name of the DataContainer instance.
@@ -121,7 +119,7 @@ class DataContainer(ABC):
     DO_NOT_DIFF = []
     """Keys to ignore when running self.diff."""
 
-    def __init__(self, raw_data=None, subcontainers=None, csv_path=None, xlsx_path=None, django_records=None, metadata=None, name=None, cast_fields=False, validate=True, lorem=None, **kwargs):
+    def __init__(self, raw_data=None, subcontainers=None, csv_path=None, xlsx_path=None, metadata=None, name=None, cast_fields=False, validate=True, lorem=None, **kwargs):
         self.name = self.NAME if name is None else name
 
         if metadata is not None:
@@ -136,11 +134,10 @@ class DataContainer(ABC):
         if 'name' not in self.__dict__.keys():
             self.name = self.NAME
 
-        mutually_exclusive_kwargs = [raw_data, csv_path, xlsx_path, django_records, lorem]
+        mutually_exclusive_kwargs = [raw_data, csv_path, xlsx_path, lorem]
         if sum([m is not None for m in mutually_exclusive_kwargs]) > 1:
             raise Exception('Cannot have more than one data source.')
         
-        is_django = False
         if csv_path is not None:
             # did you know that DataFrame.fillna(None) doens't work???
             try:
@@ -155,9 +152,6 @@ class DataContainer(ABC):
             raw_data = self.read_xlsx(xlsx_path)
         elif raw_data is not None:
             pass
-        elif django_records is not None:
-            raw_data = django_records
-            is_django = True
         elif lorem is not None:
             # Import here to avoid circular imports
             from tts_data_utils.core.lorem_utils import generate_lorem_data_for_item
@@ -170,11 +164,11 @@ class DataContainer(ABC):
             raw_data = []
 
         if subcontainers is None:
-            self.records = [self.DATA_ITEM_CLS(r, cast_fields=cast_fields, validate=validate, is_django=is_django) for r in raw_data]
+            self.records = [self.DATA_ITEM_CLS(r, cast_fields=cast_fields, validate=validate) for r in raw_data]
         elif len(raw_data) != len(subcontainers):
-            raise Exception('"subcontainers" must be the same length as data that forms DataItems (e.g raw_data, data at csv_path, data coming from django object)')
+            raise Exception('"subcontainers" must be the same length as data that forms DataItems (e.g raw_data, data at csv_path)')
         else:
-            self.records = [self.DATA_ITEM_CLS(r, cast_fields=cast_fields, validate=validate, is_django=is_django, subcontainers=s) for r, s in zip(raw_data, subcontainers)]
+            self.records = [self.DATA_ITEM_CLS(r, cast_fields=cast_fields, validate=validate, subcontainers=s) for r, s in zip(raw_data, subcontainers)]
         
         self.metadata = metadata
         # Avoids circular dependency. Probably a better way to do it
