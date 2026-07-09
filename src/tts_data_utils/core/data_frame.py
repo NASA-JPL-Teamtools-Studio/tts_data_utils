@@ -1,5 +1,4 @@
 import time
-import warnings
 import pandas as pd
 import numpy as np
 import json
@@ -9,6 +8,9 @@ from tts_data_utils.core.expr_engines import (
     _FilterExprError, _filter_engine,
     _MathExprError, _math_engine, _MathTransformer,
 )
+from tts_utilities.logger import create_logger
+
+logger = create_logger('tts_data_frame')
 
 class _TimerProxy:
     """Proxy returned by :meth:`TtsDataFrame.timer` that prints wall-clock
@@ -163,6 +165,199 @@ class TtsDataFrame(pd.DataFrame):
 
         if coerce or validate:
             self._apply_schema(coerce=coerce, validate=validate)
+
+    def moving_average(self, window_seconds, label_value=None, time_col=None, label_col=None, value_col=None):
+        """Return a time-based moving average over ``window_seconds`` seconds.
+
+        This operates on long-form telemetry where labels and values are
+        carried in configured columns, and timestamps are in
+        :attr:`DEFAULT_TIME_LABEL`.  A rolling mean is computed
+        separately for each label over a trailing window of
+        ``window_seconds`` seconds.
+
+        Parameters
+        ----------
+        window_seconds : float or int
+            Width of the rolling window in seconds.
+        time_col : str or None, optional
+            Column to use as the time axis; defaults to
+            :attr:`DEFAULT_TIME_LABEL` when None.
+        label_col : str or None, optional
+            Column holding label names; defaults to :attr:`LABEL_COL`.
+        value_col : str or None, optional
+            Column holding numeric values; defaults to :attr:`VALUE_COL`.
+
+        Returns
+        -------
+        TtsDataFrame
+            New frame of the same subclass with the same rows and
+            columns, but ``value_col`` replaced by the moving-average
+            values.
+        """
+
+        time_col = time_col or self.DEFAULT_TIME_LABEL
+        label_col = label_col or self.LABEL_COL
+        value_col = value_col or self.VALUE_COL
+
+        if time_col is None or value_col is None:
+            raise ValueError(
+                "moving_average requires DEFAULT_TIME_LABEL and VALUE_COL to be configured "
+                "or passed explicitly."
+            )
+
+        if time_col not in self.columns or value_col not in self.columns:
+            raise ValueError(
+                f"moving_average requires time and value columns present on the frame; "
+                f"missing {time_col!r} or {value_col!r}."
+            )
+
+        df = self.copy()
+
+        # Optional label filtering: restrict to a single label value when
+        # provided, using the same semantics as the Series.eq helper.
+        if label_value is not None:
+            if label_col is None or label_col not in df.columns:
+                raise ValueError(
+                    "label_value was provided but LABEL_COL/label_col is not configured "
+                    "or not present in the frame."
+                )
+            df = df[df[label_col].eq(label_value)].copy()
+
+        # If no label_value was provided but multiple labels are present,
+        # log that aggregating across them may not be meaningful.
+        if label_value is None and label_col is not None and label_col in df.columns:
+            unique_labels = pd.unique(df[label_col].dropna())
+            if len(unique_labels) > 1:
+                logger.warning(
+                    "moving_average called on a frame containing multiple labels; "
+                    "the aggregated result may not be meaningful."
+                )
+
+        # Ensure datetime time column and stable ordering for rolling
+        df[time_col] = pd.to_datetime(df[time_col])
+        sort_cols = [time_col]
+        if label_col is not None and label_col in df.columns:
+            sort_cols = [label_col, time_col]
+        df = df.sort_values(sort_cols)
+
+        window = pd.to_timedelta(window_seconds, unit="s")
+
+        if label_col is not None and label_col in df.columns:
+            def _apply(group):
+                s = group.set_index(time_col)[value_col]
+                rolled = s.rolling(window, min_periods=1).mean()
+                group[value_col] = rolled.values
+                return group
+
+            smoothed = df.groupby(label_col, group_keys=False).apply(_apply)
+        else:
+            s = df.set_index(time_col)[value_col]
+            rolled = s.rolling(window, min_periods=1).mean()
+            df[value_col] = rolled.values
+            smoothed = df
+
+        # Preserve subclass type via _constructor
+        return self._constructor(smoothed).__finalize__(self)
+
+    def block_average(self, block_size, label_value=None, time_col=None, label_col=None, value_col=None):
+        """Return a simple block (bin) average over non-overlapping blocks.
+
+        This operates on long-form telemetry where labels and values are
+        carried in configured columns. Samples are grouped into
+        non-overlapping blocks of ``block_size`` consecutive points,
+        and each block is replaced by a single row whose value is the
+        arithmetic mean of the block.
+
+        When a label column is present, blocks are formed separately for
+        each label value.
+
+        Parameters
+        ----------
+        block_size : int
+            Number of samples per block. The last partial block for each
+            label is included with whatever number of samples remain.
+        time_col : str or None, optional
+            Column to use as the time axis for sorting; defaults to
+            :attr:`DEFAULT_TIME_LABEL` when None.
+        label_col : str or None, optional
+            Column holding label names; defaults to :attr:`LABEL_COL`.
+        value_col : str or None, optional
+            Column holding numeric values; defaults to :attr:`VALUE_COL`.
+
+        Returns
+        -------
+        TtsDataFrame
+            New frame of the same subclass containing one row per
+            block, with ``value_col`` replaced by the block-mean
+            values. The time column for each block is taken from the
+            first sample in the block.
+        """
+
+        time_col = time_col or self.DEFAULT_TIME_LABEL
+        label_col = label_col or self.LABEL_COL
+        value_col = value_col or self.VALUE_COL
+
+        if value_col is None:
+            raise ValueError(
+                "block_average requires VALUE_COL to be configured or passed explicitly."
+            )
+
+        if value_col not in self.columns:
+            raise ValueError(
+                f"block_average requires value column present on the frame; missing {value_col!r}."
+            )
+
+        if block_size <= 0:
+            raise ValueError("block_size must be a positive integer")
+
+        df = self.copy()
+
+        # Optional label filtering
+        if label_value is not None:
+            if label_col is None or label_col not in df.columns:
+                raise ValueError(
+                    "label_value was provided but LABEL_COL/label_col is not configured "
+                    "or not present in the frame."
+                )
+            df = df[df[label_col].eq(label_value)].copy()
+
+        # Stable ordering within each label by time and then index
+        sort_cols = []
+        if label_col is not None and label_col in df.columns:
+            sort_cols.append(label_col)
+        if time_col is not None and time_col in df.columns:
+            sort_cols.append(time_col)
+        if sort_cols:
+            df = df.sort_values(sort_cols)
+
+        def _block_group(group):
+            n = len(group)
+            # Block id 0,1,2,... over the index position within the group
+            block_ids = np.arange(n) // block_size
+            group = group.copy()
+            group["_block_id"] = block_ids
+
+            # Compute mean per block for the value column
+            agg = group.groupby("_block_id", as_index=False).agg({value_col: "mean"})
+
+            # Take representative time/label from the first row in each block
+            first = group.groupby("_block_id", as_index=False).nth(0)
+
+            # Align the aggregated values with the representative rows
+            first = first.drop(columns=["_block_id"])
+            agg[value_col] = agg[value_col].values
+
+            # Use the columns from the representative rows, updating value_col
+            first[value_col] = agg[value_col].values
+            return first
+
+        if label_col is not None and label_col in df.columns:
+            reduced = df.groupby(label_col, group_keys=False).apply(_block_group)
+        else:
+            reduced = _block_group(df)
+
+        # Preserve subclass type via _constructor
+        return self._constructor(reduced).__finalize__(self)
 
     @classmethod
     def _read_csv_to_df(cls, filepath, *args, **kwargs):
@@ -761,7 +956,7 @@ class TtsDataFrame(pd.DataFrame):
         n = len(result)
         if exactly is not None:
             if (minimum is not None or maximum is not None):
-                warnings.warn('"exactly" overrides "minimum"/"maximum" when all are set.')
+                logger.warning('"exactly" overrides "minimum"/"maximum" when all are set.')
             if n != exactly:
                 raise ValueError(f'Expected exactly {exactly} rows, got {n}.')
         else:
@@ -869,3 +1064,25 @@ class TtsDataFrame(pd.DataFrame):
             raise ValueError("time_label must be provided or set as DEFAULT_TIME_LABEL on the class.")
         result = self[self[col] >= time] if inclusive else self[self[col] > time]
         return self._filter(result, minimum, maximum, exactly)
+    
+    @property
+    def lad(self):
+        """Return a LAD-style view: one row per label, last in time.
+
+        For each distinct value in ``LABEL_COL`` (``'name'``), this
+        selects the row whose ``DEFAULT_TIME_LABEL`` (``'scet'``) is
+        maximal and returns a new :class:`Oco2ChannelFrame` containing
+        just those rows.
+        """
+        label_col = self.LABEL_COL
+        time_col = self.DEFAULT_TIME_LABEL
+
+        if label_col not in self.columns or time_col not in self.columns:
+            return self.__class__(self.copy(), coerce=False, validate=False)
+
+        # idx of max time per label
+        idx = self.groupby(label_col)[time_col].idxmax()
+        # Preserve original order of labels as they appear in the frame
+        idx = list(idx)
+        return self.__class__(self.loc[idx].copy(), coerce=False, validate=False)
+    
