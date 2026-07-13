@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import json
 from datetime import datetime
-from tts_dante.interpolators.interpolators import StepInterpolator
+from tts_dante.interpolators.interpolators import StepInterpolator, LinearInterpolator
 from tts_data_utils.core.expr_engines import (
     _FilterExprError, _filter_engine,
     _MathExprError, _math_engine, _MathTransformer,
@@ -816,6 +816,151 @@ class TtsDataFrame(pd.DataFrame):
                               coerce=False, validate=False)
 
         return derived_df
+
+    def find_crossings(
+        self,
+        label,
+        target=0.0,
+        *,
+        interpolator=None,
+        timeout=None,
+        time_col=None,
+        label_col=None,
+        value_col=None,
+    ):
+        """Find times where a label crosses a given value using interpolation.
+
+        This is useful for detecting zero-crossings (e.g. latitude == 0) and
+        determining direction (negative-to-positive vs positive-to-negative).
+
+        Parameters
+        ----------
+        label : str
+            Label name to analyze.
+        target : float, default 0.0
+            Target value to detect crossings of (e.g. 0 for zero-crossings).
+        interpolator : Interpolator or None, optional
+            ``tts_dante`` interpolator instance to use for refining the
+            crossing time. When None, a :class:`LinearInterpolator` is used.
+        timeout : float or None, optional
+            Max distance (in time units of ``time_col``) passed to the
+            interpolator. See interpolator docs for semantics.
+        time_col, label_col, value_col : str or None, optional
+            Column overrides; fall back to class attributes.
+
+        Returns
+        -------
+        pandas.DataFrame
+            A DataFrame with columns:
+
+            - time: estimated crossing time
+            - direction: +1 for negative->positive crossings,
+              -1 for positive->negative crossings
+            - label: the label name
+            - target: the target value crossed
+        """
+        time_col = time_col or self.DEFAULT_TIME_LABEL
+        label_col = label_col or self.LABEL_COL
+        value_col = value_col or self.VALUE_COL
+
+        if time_col is None or label_col is None or value_col is None:
+            raise ValueError(
+                "find_crossings requires DEFAULT_TIME_LABEL, LABEL_COL, and VALUE_COL "
+                "to be configured or passed explicitly."
+            )
+
+        df = self[self[label_col] == label].copy()
+        if df.empty:
+            return pd.DataFrame(columns=["time", "direction", "label", "target"])
+
+        # Ensure sorted by time and convert to a numeric axis that matches the
+        # interpolator's expectation. For datetime, use seconds since epoch.
+        df = df.sort_values(time_col)
+        times_raw = pd.to_datetime(df[time_col])
+        if np.issubdtype(times_raw.dtype, np.datetime64):
+            epoch = np.datetime64("1970-01-01T00:00:00Z")
+            times = (times_raw.values - epoch) / np.timedelta64(1, "s")
+        else:
+            times = df[time_col].astype(float).values
+
+        values = df[value_col].astype(float).values
+
+        if len(times) < 2:
+            return pd.DataFrame(columns=["time", "direction", "label", "target"])
+
+        interp = interpolator if interpolator is not None else LinearInterpolator()
+
+        crossings = []
+
+        # Helper to map numeric seconds back to time_col dtype
+        def _to_time_axis(t_numeric):
+            if np.issubdtype(times_raw.dtype, np.datetime64):
+                return (epoch + np.timedelta64(int(t_numeric * 1e9), "ns")).astype(times_raw.dtype)
+            else:
+                return t_numeric
+
+        # Scan adjacent samples for sign changes around target
+        offsets = values - target
+        for i in range(len(times) - 1):
+            a, b = offsets[i], offsets[i + 1]
+            if np.isnan(a) or np.isnan(b):
+                continue
+
+            # Check if the segment [i, i+1] contains a crossing
+            if a == 0:
+                t_cross = times[i]
+            elif b == 0:
+                t_cross = times[i + 1]
+            elif a * b > 0:
+                # Same sign, no crossing
+                continue
+            else:
+                # Signs differ: refine crossing time within [times[i], times[i+1]]
+                t_lo, t_hi = times[i], times[i + 1]
+                v_lo, v_hi = values[i], values[i + 1]
+
+                # Simple bisection using the interpolator to locate where
+                # interpolated value == target.
+                for _ in range(32):  # sufficient for typical float precision
+                    t_mid = 0.5 * (t_lo + t_hi)
+                    v_mid = interp.interpolate(t_mid, [t_lo, t_hi], [v_lo, v_hi], timeout)
+                    if v_mid is None:
+                        break
+                    if (v_lo - target) * (v_mid - target) <= 0:
+                        t_hi, v_hi = t_mid, v_mid
+                    else:
+                        t_lo, v_lo = t_mid, v_mid
+                else:
+                    t_cross = 0.5 * (t_lo + t_hi)
+                    # Determine direction based on refined endpoints
+                    a, b = v_lo - target, v_hi - target
+                    direction = 1 if a < 0 and b > 0 else -1 if a > 0 and b < 0 else 0
+                    crossings.append({
+                        "time": _to_time_axis(t_cross),
+                        "direction": direction,
+                        "label": label,
+                        "target": target,
+                    })
+                    continue
+
+                # Fallback: use mid-point without bisection success
+                t_cross = 0.5 * (times[i] + times[i + 1])
+
+            # If we got here via exact endpoint or fallback, infer direction
+            direction = 0
+            if a < 0 and b > 0:
+                direction = 1
+            elif a > 0 and b < 0:
+                direction = -1
+
+            crossings.append({
+                "time": _to_time_axis(t_cross),
+                "direction": direction,
+                "label": label,
+                "target": target,
+            })
+
+        return pd.DataFrame(crossings)
 
     def _apply_schema(self, coerce: bool, validate: bool) -> None:
         
