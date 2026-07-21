@@ -3,7 +3,8 @@ import pandas as pd
 import numpy as np
 import json
 from datetime import datetime
-from tts_dante.interpolators.interpolators import StepInterpolator
+from typing import Optional, Dict, List
+from tts_dante.interpolators.interpolators import StepInterpolator, LinearInterpolator
 from tts_data_utils.core.expr_engines import (
     _FilterExprError, _filter_engine,
     _MathExprError, _math_engine, _MathTransformer,
@@ -84,6 +85,13 @@ class _SeriesWrappingIndexer:
     def __getattr__(self, name):
         return getattr(self._indexer, name)
 
+    def __call__(self, *args, **kwargs):
+        return _SeriesWrappingIndexer(
+            self._indexer(*args, **kwargs),
+            self._row_cls,
+            self._col_cls,
+        )
+
 
 class TtsDataFrame(pd.DataFrame):
     """Base DataFrame subclass for tts_data_utils.
@@ -107,17 +115,17 @@ class TtsDataFrame(pd.DataFrame):
     TIME_FORMATS = {}
 
     # Default column used for time-based operations; subclasses should override.
-    DEFAULT_TIME_LABEL = None
+    DEFAULT_TIME_LABEL = 'scet'
 
     ROW_SERIES_CLASS = TtsRowSeries
 
     COLUMN_SERIES_CLASS = TtsColumnSeries
 
-    LABEL_COL = None
+    LABEL_COL = 'name'
 
-    VALUE_COL = None
+    VALUE_COL = 'value'
 
-    LABEL_COLUMN = None
+    LABEL_COLUMN = 'name'
 
     SUBCONTAINER_KEY = None
 
@@ -258,6 +266,107 @@ class TtsDataFrame(pd.DataFrame):
 
         # Preserve subclass type via _constructor
         return self._constructor(smoothed).__finalize__(self)
+
+    def time_average(self, freq, label_value=None, time_col=None, label_col=None, value_col=None):
+        """Return a time-based average over fixed-width time bins.
+
+        This operates on long-form telemetry where labels and values are
+        carried in configured columns, and timestamps are in
+        :attr:`DEFAULT_TIME_LABEL`.  Samples are grouped into
+        non-overlapping time bins of width ``freq`` (a pandas
+        offset string such as ``'98min'``), and each bin is replaced by a
+        single row whose value is the arithmetic mean of the samples in
+        that bin.
+
+        When a label column is present, bins are formed separately for
+        each label value.
+
+        Parameters
+        ----------
+        freq : str or DateOffset
+            Resampling frequency understood by :meth:`pandas.Series.resample`,
+            e.g. ``'98min'``.
+        label_value : any or None, optional
+            When provided, restrict averaging to rows where ``label_col``
+            equals this value.
+        time_col : str or None, optional
+            Column to use as the time axis; defaults to
+            :attr:`DEFAULT_TIME_LABEL` when None.
+        label_col : str or None, optional
+            Column holding label names; defaults to :attr:`LABEL_COL`.
+        value_col : str or None, optional
+            Column holding numeric values; defaults to :attr:`VALUE_COL`.
+
+        Returns
+        -------
+        TtsDataFrame
+            New frame of the same subclass containing one row per time
+            bin, with ``value_col`` replaced by the bin-mean values. The
+            time column for each bin is taken from the bin's resample
+            index (typically the left edge of the interval).
+        """
+
+        time_col = time_col or self.DEFAULT_TIME_LABEL
+        label_col = label_col or self.LABEL_COL
+        value_col = value_col or self.VALUE_COL
+
+        if time_col is None or value_col is None:
+            raise ValueError(
+                "time_average requires DEFAULT_TIME_LABEL and VALUE_COL to be configured "
+                "or passed explicitly."
+            )
+
+        if time_col not in self.columns or value_col not in self.columns:
+            raise ValueError(
+                f"time_average requires time and value columns present on the frame; "
+                f"missing {time_col!r} or {value_col!r}."
+            )
+
+        df = self.copy()
+
+        # Optional label filtering
+        if label_value is not None:
+            if label_col is None or label_col not in df.columns:
+                raise ValueError(
+                    "label_value was provided but LABEL_COL/label_col is not configured "
+                    "or not present in the frame."
+                )
+            df = df[df[label_col].eq(label_value)].copy()
+
+        # Ensure datetime time column and stable ordering for resampling
+        df[time_col] = pd.to_datetime(df[time_col])
+
+        def _resample_group(group):
+            # Work on a copy with a datetime index for resampling.
+            g = group.copy()
+            g[time_col] = pd.to_datetime(g[time_col])
+            g = g.set_index(time_col).sort_index()
+
+            # Resample the value column to compute mean per bin.
+            agg = g[value_col].resample(freq).mean()
+
+            # Drop bins with no data (NaN means no contributing samples).
+            mask = ~agg.isna()
+            if not mask.any():
+                return g.iloc[0:0]
+
+            agg = agg[mask]
+
+            # Take representative metadata from the first row in each bin.
+            first = g.resample(freq).first()
+            first = first.loc[agg.index]
+
+            # Overwrite value column with the bin means and restore time column.
+            first[value_col] = agg.values
+            first = first.reset_index()
+            return first
+
+        if label_col is not None and label_col in df.columns:
+            reduced = df.groupby(label_col, group_keys=False).apply(_resample_group)
+        else:
+            reduced = _resample_group(df)
+
+        return self._constructor(reduced).__finalize__(self)
 
     def block_average(self, block_size, label_value=None, time_col=None, label_col=None, value_col=None):
         """Return a simple block (bin) average over non-overlapping blocks.
@@ -606,6 +715,144 @@ class TtsDataFrame(pd.DataFrame):
         hi = np.searchsorted(qt_arr, row_times + tol_td, side='right')
         return self[lo < hi]
 
+    def contiguous_runs(
+        self,
+        labels,
+        *,
+        tolerance=None,
+        min_repeats: int = 1,
+        target_value=None,
+        label_col: Optional[str] = None,
+        value_col: Optional[str] = None,
+        index_col: Optional[str] = None,
+    ) -> Dict[str, List['TtsDataFrame']]:
+        """Return contiguous runs of constant values for one or more labels.
+
+        For each label name in ``labels``, this method scans the long-form
+        telemetry in time order and identifies maximal contiguous runs where
+        the label's ``value_col`` is constant across successive samples. Each
+        qualifying run (after filtering) is converted into a new
+        :class:`TtsDataFrame` that includes *all* labels present in the
+        original frame over the corresponding time window, using
+        :meth:`at_times_where` to honor the ``tolerance`` parameter.
+
+        Parameters
+        ----------
+        labels : str or iterable of str
+            Label name or collection of label names to analyze.
+        tolerance : number or pd.Timedelta or None, optional
+            Passed through to :meth:`at_times_where` to include rows within
+            this time window of qualifying timestamps. A plain number is
+            interpreted as seconds.
+        min_repeats : int, default 1
+            Minimum number of consecutive samples with the same value
+            required for a run to be kept. Shorter runs are discarded.
+        target_value : any or None, optional
+            When provided, only runs where the label's value equals
+            ``target_value`` are kept. Runs with other values are discarded.
+        label_col, value_col, index_col : str or None, optional
+            Column overrides; fall back to class attributes.
+
+        Returns
+        -------
+        dict[str, list[TtsDataFrame]]
+            Mapping from each label name to a list of run-specific frames.
+        """
+        label_col = label_col or self.LABEL_COL
+        value_col = value_col or self.VALUE_COL
+        index_col = index_col or self.DEFAULT_TIME_LABEL
+
+        if label_col is None:
+            raise ValueError("label_col must be provided or set as LABEL_COL on the class.")
+        if value_col is None:
+            raise ValueError("value_col must be provided or set as VALUE_COL on the class.")
+        if index_col is None:
+            raise ValueError("index_col must be provided or set as DEFAULT_TIME_LABEL on the class.")
+        if min_repeats <= 0:
+            raise ValueError("min_repeats must be a positive integer")
+
+        # Normalize labels argument to a list of names
+        if isinstance(labels, str):
+            label_names = [labels]
+        else:
+            label_names = list(labels)
+
+        result: dict[str, list['TtsDataFrame']] = {}
+
+        for lbl in label_names:
+            # Extract time-ordered series for this label
+            label_df = self[self[label_col] == lbl].copy()
+            if label_df.empty:
+                result[lbl] = []
+                continue
+
+            label_df = label_df.sort_values(index_col)
+            vals = label_df[value_col].values
+
+            # Identify contiguous runs of constant values
+            runs: list[tuple[int, int, object]] = []
+            start_idx = 0
+            current_value = vals[0]
+
+            for i in range(1, len(label_df)):
+                v = vals[i]
+                if v == current_value:
+                    continue
+                # End of current run at i-1
+                runs.append((start_idx, i - 1, current_value))
+                start_idx = i
+                current_value = v
+
+            # Final run
+            runs.append((start_idx, len(label_df) - 1, current_value))
+
+            # Filter runs by length and optional target_value
+            filtered_runs: list[tuple[int, int, object]] = []
+            for start, end, run_value in runs:
+                length = end - start + 1
+                if length < min_repeats:
+                    continue
+                if target_value is not None and run_value != target_value:
+                    continue
+                filtered_runs.append((start, end, run_value))
+
+            run_frames: list['TtsDataFrame'] = []
+
+            for start, end, run_value in filtered_runs:
+                t_start = label_df.iloc[start][index_col]
+                t_end = label_df.iloc[end][index_col]
+
+                # Restrict to the time window for this run
+                time_mask = (self[index_col] >= t_start) & (self[index_col] <= t_end)
+                window = self[time_mask].copy()
+                if window.empty:
+                    continue
+
+                # Build a filter expression matching this label/value.  Booleans
+                # are rendered as 0/1 so that they are parsed as numeric
+                # literals by the filter engine rather than as label names.
+                if isinstance(run_value, str):
+                    expr_value = repr(run_value)
+                elif isinstance(run_value, bool):
+                    expr_value = "1" if run_value else "0"
+                else:
+                    expr_value = str(run_value)
+                expr = f"{lbl} == {expr_value}"
+
+                run_df = window.at_times_where(
+                    expr,
+                    tolerance=tolerance,
+                    label_col=label_col,
+                    value_col=value_col,
+                    index_col=index_col,
+                )
+                if not run_df.empty:
+                    run_frames.append(run_df)
+
+            result[lbl] = run_frames
+
+        return result
+
     @property
     def wide(self):
         index   = self.DEFAULT_TIME_LABEL
@@ -656,6 +903,30 @@ class TtsDataFrame(pd.DataFrame):
             Rows where the expression evaluates to True.
         """
         return self[_filter_engine.parse(expr).eval(self)]
+
+    def inspect_expr_language(self):
+        math_engine = self.MATH_ENGINE
+        math_transformer = self.MATH_TRANSFORMER
+        funcs = getattr(math_transformer, "_FUNCS", {})
+        math_functions = sorted(funcs.keys()) if isinstance(funcs, dict) else []
+        filter_engine = _filter_engine
+        info = {
+            "math_engine": type(math_engine),
+            "math_transformer": math_transformer,
+            "math_functions": math_functions,
+            "math_keywords": {
+                "boolean": {"and", "or", "not"},
+                "comparison": {">", ">=", "<", "<=", "==", "!=", "in"},
+            },
+            "filter_engine": type(filter_engine),
+            "filter_keywords": {
+                "boolean": {"and", "or", "not"},
+                "comparison": {">", ">=", "<", "<=", "==", "!=", "is", "is not", "in", "not in"},
+                "literals": {"None", "null", "none", "True", "true", "False", "false"},
+            },
+        }
+        return info
+
 
     def get_interpolator(self, label: str):
         """Return the interpolator to use for ``label`` in :meth:`derive_values`.
@@ -816,6 +1087,156 @@ class TtsDataFrame(pd.DataFrame):
                               coerce=False, validate=False)
 
         return derived_df
+
+    def find_crossings(
+        self,
+        label,
+        target=0.0,
+        *,
+        interpolator=None,
+        timeout=None,
+        time_col=None,
+        label_col=None,
+        value_col=None,
+    ):
+        """Find times where a label crosses a given value using interpolation.
+
+        This is useful for detecting zero-crossings (e.g. latitude == 0) and
+        determining direction (negative-to-positive vs positive-to-negative).
+
+        Parameters
+        ----------
+        label : str
+            Label name to analyze.
+        target : float, default 0.0
+            Target value to detect crossings of (e.g. 0 for zero-crossings).
+        interpolator : Interpolator or None, optional
+            ``tts_dante`` interpolator instance to use for refining the
+            crossing time. When None, a :class:`LinearInterpolator` is used.
+        timeout : float or None, optional
+            Max distance (in time units of ``time_col``) passed to the
+            interpolator. See interpolator docs for semantics.
+        time_col, label_col, value_col : str or None, optional
+            Column overrides; fall back to class attributes.
+
+        Returns
+        -------
+        TtsDataFrame
+            Frame with one row per crossing, columns:
+
+            - time: estimated crossing time
+            - direction: +1 for negative->positive crossings,
+              -1 for positive->negative crossings
+            - label: the label name
+            - target: the target value crossed
+        """
+        time_col = time_col or self.DEFAULT_TIME_LABEL
+        label_col = label_col or self.LABEL_COL
+        value_col = value_col or self.VALUE_COL
+
+        if time_col is None or label_col is None or value_col is None:
+            raise ValueError(
+                "find_crossings requires DEFAULT_TIME_LABEL, LABEL_COL, and VALUE_COL "
+                "to be configured or passed explicitly."
+            )
+
+        df = self[self[label_col] == label].copy()
+        if df.empty:
+            empty = pd.DataFrame(columns=["time", "direction", "label", "target"])
+            return self._constructor(empty).__finalize__(self)
+
+        # Ensure sorted by time and convert to a numeric axis that matches the
+        # interpolator's expectation. For datetime, use seconds since epoch.
+        df = df.sort_values(time_col)
+        col = df[time_col]
+        if np.issubdtype(col.dtype, np.datetime64):
+            times_raw = pd.to_datetime(col)
+            epoch = np.datetime64("1970-01-01T00:00:00Z")
+            times = (times_raw.values - epoch) / np.timedelta64(1, "s")
+        else:
+            times_raw = col
+            times = col.astype(float).values
+
+        values = df[value_col].astype(float).values
+
+        if len(times) < 2:
+            empty = pd.DataFrame(columns=["time", "direction", "label", "target"])
+            return self._constructor(empty).__finalize__(self)
+
+        interp = interpolator if interpolator is not None else LinearInterpolator()
+
+        crossings = []
+
+        # Helper to map numeric seconds back to time_col dtype
+        def _to_time_axis(t_numeric):
+            if np.issubdtype(times_raw.dtype, np.datetime64):
+                return (epoch + np.timedelta64(int(t_numeric * 1e9), "ns")).astype(times_raw.dtype)
+            else:
+                return t_numeric
+
+        # Scan adjacent samples for sign changes around target
+        offsets = values - target
+        for i in range(len(times) - 1):
+            a, b = offsets[i], offsets[i + 1]
+            if np.isnan(a) or np.isnan(b):
+                continue
+
+            # Check if the segment [i, i+1] contains a crossing
+            if a == 0:
+                t_cross = times[i]
+            elif b == 0:
+                t_cross = times[i + 1]
+            elif a * b > 0:
+                # Same sign, no crossing
+                continue
+            else:
+                # Signs differ: refine crossing time within [times[i], times[i+1]]
+                t_lo, t_hi = times[i], times[i + 1]
+                v_lo, v_hi = values[i], values[i + 1]
+
+                # Simple bisection using the interpolator to locate where
+                # interpolated value == target.
+                for _ in range(32):  # sufficient for typical float precision
+                    t_mid = 0.5 * (t_lo + t_hi)
+                    v_mid = interp.interpolate(t_mid, [t_lo, t_hi], [v_lo, v_hi], timeout)
+                    if v_mid is None:
+                        break
+                    if (v_lo - target) * (v_mid - target) <= 0:
+                        t_hi, v_hi = t_mid, v_mid
+                    else:
+                        t_lo, v_lo = t_mid, v_mid
+                else:
+                    t_cross = 0.5 * (t_lo + t_hi)
+                    # Determine direction based on refined endpoints
+                    a, b = v_lo - target, v_hi - target
+                    direction = 1 if a < 0 and b > 0 else -1 if a > 0 and b < 0 else 0
+                    crossings.append({
+                        "time": _to_time_axis(t_cross),
+                        "direction": direction,
+                        "label": label,
+                        "target": target,
+                    })
+                    continue
+
+                # Fallback: use mid-point without bisection success
+                t_cross = 0.5 * (times[i] + times[i + 1])
+
+            # If we got here via exact endpoint or fallback, infer direction
+            direction = 0
+            if a < 0 and b > 0:
+                direction = 1
+            elif a > 0 and b < 0:
+                direction = -1
+
+            crossings.append({
+                "time": _to_time_axis(t_cross),
+                "direction": direction,
+                "label": label,
+                "target": target,
+            })
+
+        cross_df = pd.DataFrame(crossings)
+        return self._constructor(cross_df).__finalize__(self)
 
     def _apply_schema(self, coerce: bool, validate: bool) -> None:
         
