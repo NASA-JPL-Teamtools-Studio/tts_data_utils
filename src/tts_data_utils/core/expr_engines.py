@@ -1,5 +1,6 @@
 import lark
 import numpy as np
+import re
 
 
 class _FilterExprError(Exception):
@@ -471,9 +472,19 @@ class _MathEngine:
             evaluate the expression tree. Defaults to the core
             :class:`_MathTransformer`.
         """
+        # Normalise numeric literals that use a leading dot (e.g. .5, .0000005)
+        # into a form accepted by the grammar (0.5, 0.0000005). The grammar
+        # requires a digit before the decimal point, but many of the
+        # dictionary-sourced expressions use the shorthand .x. Since this
+        # language has no attribute access syntax (x.y), a bare leading
+        # dot followed by digits is always a numeric literal.
+        normalised_expr = re.sub(r"(?<!\d)\.(\d)", r"0.\1", expr)
+
         try:
-            tree = self._parser.parse(expr)
+            tree = self._parser.parse(normalised_expr)
         except lark.UnexpectedInput as e:
+            # Report the original expression in the error message so that
+            # callers/logs see exactly what was provided.
             raise _MathExprError(f"Invalid math expression: {expr!r}") from e
         return _ParsedMath(tree, transformer_cls)
 
