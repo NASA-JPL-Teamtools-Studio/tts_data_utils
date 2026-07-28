@@ -1448,15 +1448,32 @@ class TtsDataFrame(pd.DataFrame):
         minimum, maximum, exactly : int or None
             Raise ``ValueError`` if result count violates constraint.
         """
-        if tolerance and isinstance(value, (int, float)):
-            result = self[(self[column] - value).abs() <= tolerance]
+        col = self[column]
+
+        # Treat comparisons to None as null checks for convenience.
+        if value is None:
+            result = self[col.isna()]
+        elif tolerance and isinstance(value, (int, float)):
+            result = self[(col - value).abs() <= tolerance]
         else:
-            result = self[self[column] == value]
+            result = self[col == value]
+
         return self._filter(result, minimum, maximum, exactly)
 
     def ne(self, column, value, minimum=None, maximum=None, exactly=None):
-        """Return rows where ``column != value``."""
-        return self._filter(self[self[column] != value], minimum, maximum, exactly)
+        """Return rows where ``column != value``.
+
+        When ``value`` is ``None``, this behaves as a non-null check
+        (rows where ``column`` is not null).
+        """
+        col = self[column]
+
+        if value is None:
+            result = self[col.notna()]
+        else:
+            result = self[col != value]
+
+        return self._filter(result, minimum, maximum, exactly)
 
     def gt(self, column, value, minimum=None, maximum=None, exactly=None):
         """Return rows where ``column > value``."""
