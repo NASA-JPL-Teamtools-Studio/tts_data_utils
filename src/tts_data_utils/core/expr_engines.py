@@ -65,10 +65,16 @@ class _FilterTransformer(lark.Transformer):
 
     @lark.v_args(inline=True)
     def eq(self, left, right):
+        # Treat comparisons to None like null checks, consistent with ``is``.
+        if right is None:
+            return left.isna() if hasattr(left, 'isna') else (left is None)
         return left == right
 
     @lark.v_args(inline=True)
     def ne(self, left, right):
+        # Treat comparisons to None like null checks, consistent with ``is not``.
+        if right is None:
+            return left.notna() if hasattr(left, 'notna') else (left is not None)
         return left != right
 
     @lark.v_args(inline=True)
