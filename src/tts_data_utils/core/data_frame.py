@@ -1435,6 +1435,26 @@ class TtsDataFrame(pd.DataFrame):
                 raise ValueError(f'Expected at most {maximum} rows, got {n}.')
         return result
 
+    def _get_column_for_filter(self, column):
+        if column in self.columns or "." not in column:
+            return self[column]
+
+        base, *keys = column.split(".")
+        if base not in self.columns:
+            return self[column]
+
+        series = self[base]
+
+        def _extract(value):
+            v = value
+            for key in keys:
+                if not isinstance(v, dict):
+                    return np.nan
+                v = v.get(key, np.nan)
+            return v
+
+        return series.map(_extract)
+
     def eq(self, column, value, minimum=None, maximum=None, exactly=None, tolerance=0):
         """Return rows where ``column == value``.
 
@@ -1448,7 +1468,7 @@ class TtsDataFrame(pd.DataFrame):
         minimum, maximum, exactly : int or None
             Raise ``ValueError`` if result count violates constraint.
         """
-        col = self[column]
+        col = self._get_column_for_filter(column)
 
         # Treat comparisons to None as null checks for convenience.
         if value is None:
@@ -1466,7 +1486,7 @@ class TtsDataFrame(pd.DataFrame):
         When ``value`` is ``None``, this behaves as a non-null check
         (rows where ``column`` is not null).
         """
-        col = self[column]
+        col = self._get_column_for_filter(column)
 
         if value is None:
             result = self[col.notna()]
@@ -1477,46 +1497,80 @@ class TtsDataFrame(pd.DataFrame):
 
     def gt(self, column, value, minimum=None, maximum=None, exactly=None):
         """Return rows where ``column > value``."""
-        return self._filter(self[self[column] > value], minimum, maximum, exactly)
+        col = self._get_column_for_filter(column)
+        return self._filter(self[col > value], minimum, maximum, exactly)
 
     def lt(self, column, value, minimum=None, maximum=None, exactly=None):
         """Return rows where ``column < value``."""
-        return self._filter(self[self[column] < value], minimum, maximum, exactly)
+        col = self._get_column_for_filter(column)
+        return self._filter(self[col < value], minimum, maximum, exactly)
 
     def gte(self, column, value, minimum=None, maximum=None, exactly=None):
         """Return rows where ``column >= value``."""
-        return self._filter(self[self[column] >= value], minimum, maximum, exactly)
+        col = self._get_column_for_filter(column)
+        return self._filter(self[col >= value], minimum, maximum, exactly)
 
     def lte(self, column, value, minimum=None, maximum=None, exactly=None):
         """Return rows where ``column <= value``."""
-        return self._filter(self[self[column] <= value], minimum, maximum, exactly)
+        col = self._get_column_for_filter(column)
+        return self._filter(self[col <= value], minimum, maximum, exactly)
 
     def isin(self, column, values, minimum=None, maximum=None, exactly=None):
         """Return rows where ``column`` value is in ``values``."""
-        return self._filter(self[self[column].isin(values)], minimum, maximum, exactly)
+        col = self._get_column_for_filter(column)
+        return self._filter(self[col.isin(values)], minimum, maximum, exactly)
 
     def notin(self, column, values, minimum=None, maximum=None, exactly=None):
         """Return rows where ``column`` value is not in ``values``."""
-        return self._filter(self[~self[column].isin(values)], minimum, maximum, exactly)
+        col = self._get_column_for_filter(column)
+        return self._filter(self[~col.isin(values)], minimum, maximum, exactly)
+
+    def dict_key_eq(self, column, key, value, minimum=None, maximum=None, exactly=None):
+        """Return rows where a dict-valued ``column`` has ``key == value``.
+
+        This is intended for columns that store dictionaries, such as the
+        ``arguments`` column on EVR frames produced by ``extract_arguments``.
+        Rows where the cell is not a dict or does not contain ``key`` are
+        treated as non-matching and are not included in the result.
+        """
+        col = self[column]
+
+        sentinel = object()
+
+        def _matches(d):
+            if not isinstance(d, dict):
+                return False
+            v = d.get(key, sentinel)
+            if v is sentinel:
+                return False
+            return v == value
+
+        mask = col.map(_matches)
+        result = self[mask]
+        return self._filter(result, minimum, maximum, exactly)
 
     def contains(self, column, substring, case_sensitive=True, minimum=None, maximum=None, exactly=None):
         """Return rows where string ``column`` contains ``substring``."""
-        mask = self[column].str.contains(substring, case=case_sensitive, na=False)
+        col = self._get_column_for_filter(column)
+        mask = col.str.contains(substring, case=case_sensitive, na=False)
         return self._filter(self[mask], minimum, maximum, exactly)
 
     def doesnotcontain(self, column, substring, case_sensitive=True, minimum=None, maximum=None, exactly=None):
         """Return rows where string ``column`` does not contain ``substring``."""
-        mask = self[column].str.contains(substring, case=case_sensitive, na=False)
+        col = self._get_column_for_filter(column)
+        mask = col.str.contains(substring, case=case_sensitive, na=False)
         return self._filter(self[~mask], minimum, maximum, exactly)
 
     def between(self, column, lower, upper, inclusive='both', minimum=None, maximum=None, exactly=None):
         """Return rows where ``lower <= column <= upper`` (configurable via ``inclusive``)."""
-        result = self[self[column].between(lower, upper, inclusive=inclusive)]
+        col = self._get_column_for_filter(column)
+        result = self[col.between(lower, upper, inclusive=inclusive)]
         return self._filter(result, minimum, maximum, exactly)
 
     def matches(self, column, pattern, minimum=None, maximum=None, exactly=None):
         """Return rows where string ``column`` matches regex ``pattern``."""
-        mask = self[column].str.match(pattern, na=False)
+        col = self._get_column_for_filter(column)
+        mask = col.str.match(pattern, na=False)
         return self._filter(self[mask], minimum, maximum, exactly)
 
     def before(self, time, time_label=None, inclusive=False, minimum=None, maximum=None, exactly=None):

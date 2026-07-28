@@ -42,10 +42,31 @@ class _FilterTransformer(lark.Transformer):
     @lark.v_args(inline=True)
     def column(self, tok):
         name = str(tok)
-        if name not in self._df.columns:
+
+        # Direct column hit or simple name with no dotted path.
+        if name in self._df.columns or "." not in name:
+            if name not in self._df.columns:
+                raise _FilterExprError(
+                    f"Column {name!r} not found; available: {list(self._df.columns)}")
+            return self._df[name]
+
+        # Support dotted access into dict-valued columns, e.g. ``arguments.rts_no``.
+        base, *keys = name.split(".")
+        if base not in self._df.columns:
             raise _FilterExprError(
-                f"Column {name!r} not found; available: {list(self._df.columns)}")
-        return self._df[name]
+                f"Column {base!r} (from {name!r}) not found; available: {list(self._df.columns)}")
+
+        series = self._df[base]
+
+        def _extract(value):
+            v = value
+            for key in keys:
+                if not isinstance(v, dict):
+                    return None
+                v = v.get(key)
+            return v
+
+        return series.map(_extract)
 
     @lark.v_args(inline=True)
     def gt(self, left, right):
