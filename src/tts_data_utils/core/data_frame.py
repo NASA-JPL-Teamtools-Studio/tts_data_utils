@@ -1026,6 +1026,16 @@ class TtsDataFrame(pd.DataFrame):
         derived_name, rhs = expr.split('=', 1)
         derived_name = derived_name.strip()
 
+        # Support multiple target names on the left-hand side, e.g.:
+        #   "M_val, T_val, RTS_val = fmt_match(message, 'M=%d; T=%d; RTS=%d')"
+        # In this case, the RHS must evaluate to an iterable of the same
+        # length as the number of target names.
+        derived_names = [n.strip() for n in derived_name.split(',') if n.strip()]
+        if not derived_names:
+            raise ValueError(
+                f"derive_values expr must have at least one target name before '=', got {expr!r}")
+        multi_output = len(derived_names) > 1
+
         # Parse using the shared math engine and this class's transformer.
         parsed = self.MATH_ENGINE.parse(rhs.strip(), transformer_cls=self.MATH_TRANSFORMER)
 
@@ -1057,7 +1067,26 @@ class TtsDataFrame(pd.DataFrame):
             for t in common_times:
                 slot = {lbl: lookup[lbl][t] for lbl in parsed.labels}
                 result = parsed.eval(slot)
-                rows.append({index_col: t, label_col: derived_name, value_col: result})
+
+                if multi_output:
+                    try:
+                        values = list(result)
+                    except TypeError as exc:
+                        raise _MathExprError(
+                            "derive_values: multi-target assignment requires the "
+                            "expression to return an iterable of values."
+                        ) from exc
+
+                    if len(values) != len(derived_names):
+                        raise _MathExprError(
+                            f"derive_values: expression returned {len(values)} values "
+                            f"but {len(derived_names)} target names were given."
+                        )
+
+                    for name, val in zip(derived_names, values):
+                        rows.append({index_col: t, label_col: name, value_col: val})
+                else:
+                    rows.append({index_col: t, label_col: derived_names[0], value_col: result})
         else:
             all_times = sorted({t for times, _ in label_data.values() for t in times})
             for t in all_times:
@@ -1072,7 +1101,26 @@ class TtsDataFrame(pd.DataFrame):
                 if not valid:
                     continue
                 result = parsed.eval(slot)
-                rows.append({index_col: t, label_col: derived_name, value_col: result})
+
+                if multi_output:
+                    try:
+                        values = list(result)
+                    except TypeError as exc:
+                        raise _MathExprError(
+                            "derive_values: multi-target assignment requires the "
+                            "expression to return an iterable of values."
+                        ) from exc
+
+                    if len(values) != len(derived_names):
+                        raise _MathExprError(
+                            f"derive_values: expression returned {len(values)} values "
+                            f"but {len(derived_names)} target names were given."
+                        )
+
+                    for name, val in zip(derived_names, values):
+                        rows.append({index_col: t, label_col: name, value_col: val})
+                else:
+                    rows.append({index_col: t, label_col: derived_names[0], value_col: result})
 
         if not rows:
             if append:
