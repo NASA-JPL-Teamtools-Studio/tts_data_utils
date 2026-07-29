@@ -1316,9 +1316,49 @@ class TtsDataFrame(pd.DataFrame):
 
             # Time-like columns: use pandas to_datetime with declared format
             if col in time_formats and time_formats[col] != "TBD":
-                fmt = time_formats[col]
-                self[col] = pd.to_datetime(series, format=fmt, errors="raise")
-                continue
+                fmt_spec = time_formats[col]
+
+                # Single explicit format string: preserve strict behaviour and
+                # raise on invalid parses.
+                if isinstance(fmt_spec, str):
+                    self[col] = pd.to_datetime(series, format=fmt_spec, errors="raise")
+                    continue
+
+                # Multiple formats: attempt each in order, allowing a mixture of
+                # datetime objects and differently-formatted strings. This is
+                # useful for missions where a given column (e.g. SCET) may
+                # appear in more than one textual representation.
+                if isinstance(fmt_spec, (list, tuple)):
+
+                    def _is_datetime_like(v):
+                        return isinstance(v, (datetime, pd.Timestamp, np.datetime64))
+
+                    if pd.api.types.is_object_dtype(series):
+                        is_dt = series.apply(_is_datetime_like)
+                    else:
+                        # Non-object dtypes are unlikely to be mixed, but treat
+                        # them as non-datetime to be safe.
+                        is_dt = pd.Series(False, index=series.index)
+
+                    # Start by preserving any existing datetime-like values
+                    result = pd.to_datetime(series.where(is_dt, None), errors="coerce")
+
+                    for fmt in fmt_spec:
+                        remaining = result.isna()
+                        if not remaining.any():
+                            break
+                        to_parse = series[remaining]
+                        parsed = pd.to_datetime(to_parse, format=fmt, errors="coerce")
+                        result.loc[remaining] = parsed
+
+                    # Only overwrite the column if we successfully parsed at
+                    # least one value; otherwise leave as-is so callers can
+                    # handle unexpected formats themselves.
+                    if result.notna().any():
+                        self[col] = result
+                    continue
+
+                # Unknown fmt_spec type: fall through and treat as a normal column
 
             # Non-time columns: attempt simple casting based on primary type
             allowed = types if isinstance(types, tuple) else (types,)
