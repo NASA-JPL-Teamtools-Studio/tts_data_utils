@@ -476,6 +476,61 @@ class TtsDataFrame(pd.DataFrame):
         """
         return pd.read_csv(filepath, *args, **kwargs)
 
+    def to_csv(self, *args, **kwargs):  # pragma: no cover - thin wrapper around pandas
+        """Write object to a CSV file, formatting time columns via ``TIME_FORMATS``.
+
+        This behaves like :meth:`pandas.DataFrame.to_csv`, but for any columns
+        listed in :attr:`TIME_FORMATS` that are datetime-like, values are first
+        converted to strings using the configured strftime format. When a column
+        has multiple formats configured (list/tuple), the first entry is used
+        for export.
+        """
+
+        time_formats = getattr(self, "TIME_FORMATS", None) or {}
+        if not time_formats:
+            # No configured time formats: fall back to the base implementation.
+            return pd.DataFrame.to_csv(self, *args, **kwargs)
+
+        df = self.copy()
+
+        for col, fmt_spec in time_formats.items():
+            if col not in df.columns:
+                continue
+            if fmt_spec == "TBD" or fmt_spec is None:
+                continue
+
+            # When multiple formats are configured, use the first one for export.
+            if isinstance(fmt_spec, (list, tuple)):
+                if not fmt_spec:
+                    continue
+                fmt = fmt_spec[0]
+            else:
+                fmt = fmt_spec
+
+            if not isinstance(fmt, str):
+                continue
+
+            series = df[col]
+
+            # If the column is already datetime-like, format directly.
+            if pd.api.types.is_datetime64_any_dtype(series) or pd.api.types.is_datetime64tz_dtype(series):
+                df[col] = series.dt.strftime(fmt)
+                continue
+
+            # For object columns, try to coerce to datetime first and only
+            # format entries that successfully convert.
+            if series.dtype == "object":
+                dt_series = pd.to_datetime(series, errors="coerce")
+                if dt_series.notna().any():
+                    formatted = dt_series.dt.strftime(fmt)
+                    mask = dt_series.notna()
+                    new_series = series.astype(object)
+                    new_series[mask] = formatted[mask]
+                    df[col] = new_series
+
+        # Delegate to pandas using the formatted copy.
+        return pd.DataFrame.to_csv(df, *args, **kwargs)
+
     @property
     def _constructor(self):  # pragma: no cover - exercised indirectly
         cls = type(self)
