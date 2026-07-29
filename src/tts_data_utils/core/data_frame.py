@@ -1436,24 +1436,82 @@ class TtsDataFrame(pd.DataFrame):
         return result
 
     def _get_column_for_filter(self, column):
-        if column in self.columns or "." not in column:
+        # Exact column name wins.
+        if column in self.columns:
             return self[column]
 
-        base, *keys = column.split(".")
-        if base not in self.columns:
-            return self[column]
+        def _parse_bracket_path(spec):
+            s = spec
+            n = len(s)
+            if n == 0:
+                return None
+            # Parse leading NAME (Python identifier style)
+            i = 0
+            if not (s[0].isalpha() or s[0] == "_"):
+                return None
+            i += 1
+            while i < n and (s[i].isalnum() or s[i] == "_"):
+                i += 1
+            base = s[:i]
+            keys = []
+            while i < n:
+                if s[i] != "[":
+                    return None
+                i += 1
+                if i >= n or s[i] not in ("'", '"'):
+                    return None
+                quote = s[i]
+                i += 1
+                start = i
+                while i < n and s[i] != quote:
+                    i += 1
+                if i >= n:
+                    return None
+                key = s[start:i]
+                keys.append(key)
+                i += 1  # skip closing quote
+                if i >= n or s[i] != "]":
+                    return None
+                i += 1  # skip closing bracket
+            if i != n:
+                return None
+            return base, keys
 
-        series = self[base]
+        # Bracket syntax: arguments['rts_no']['inner'] ...
+        parsed = _parse_bracket_path(column)
+        if parsed is not None:
+            base, keys = parsed
+            if base in self.columns:
+                series = self[base]
 
-        def _extract(value):
-            v = value
-            for key in keys:
-                if not isinstance(v, dict):
-                    return np.nan
-                v = v.get(key, np.nan)
-            return v
+                def _extract(value):
+                    v = value
+                    for key in keys:
+                        if not isinstance(v, dict):
+                            return np.nan
+                        v = v.get(key, np.nan)
+                    return v
 
-        return series.map(_extract)
+                return series.map(_extract)
+
+        # Fallback: dotted dict access (for backwards compatibility).
+        if "." in column:
+            base, *keys = column.split(".")
+            if base in self.columns:
+                series = self[base]
+
+                def _extract(value):
+                    v = value
+                    for key in keys:
+                        if not isinstance(v, dict):
+                            return np.nan
+                        v = v.get(key, np.nan)
+                    return v
+
+                return series.map(_extract)
+
+        # Default behavior: treat as a normal column (will raise if missing).
+        return self[column]
 
     def eq(self, column, value, minimum=None, maximum=None, exactly=None, tolerance=0):
         """Return rows where ``column == value``.

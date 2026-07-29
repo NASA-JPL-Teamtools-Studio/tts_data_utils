@@ -42,31 +42,71 @@ class _FilterTransformer(lark.Transformer):
     @lark.v_args(inline=True)
     def column(self, tok):
         name = str(tok)
-
-        # Direct column hit or simple name with no dotted path.
-        if name in self._df.columns or "." not in name:
-            if name not in self._df.columns:
-                raise _FilterExprError(
-                    f"Column {name!r} not found; available: {list(self._df.columns)}")
+        # Direct column hit.
+        if name in self._df.columns:
             return self._df[name]
 
-        # Support dotted access into dict-valued columns, e.g. ``arguments.rts_no``.
-        base, *keys = name.split(".")
-        if base not in self._df.columns:
-            raise _FilterExprError(
-                f"Column {base!r} (from {name!r}) not found; available: {list(self._df.columns)}")
-
-        series = self._df[base]
-
-        def _extract(value):
-            v = value
-            for key in keys:
-                if not isinstance(v, dict):
+        def _parse_bracket_path(spec):
+            s = spec
+            n = len(s)
+            if n == 0:
+                return None
+            # Parse leading NAME (Python identifier style)
+            i = 0
+            if not (s[0].isalpha() or s[0] == "_"):
+                return None
+            i += 1
+            while i < n and (s[i].isalnum() or s[i] == "_"):
+                i += 1
+            base = s[:i]
+            keys = []
+            while i < n:
+                if s[i] != "[":
                     return None
-                v = v.get(key)
-            return v
+                i += 1
+                if i >= n or s[i] not in ("'", '"'):
+                    return None
+                quote = s[i]
+                i += 1
+                start = i
+                while i < n and s[i] != quote:
+                    i += 1
+                if i >= n:
+                    return None
+                key = s[start:i]
+                keys.append(key)
+                i += 1  # skip closing quote
+                if i >= n or s[i] != "]":
+                    return None
+                i += 1  # skip closing bracket
+            if i != n:
+                return None
+            return base, keys
 
-        return series.map(_extract)
+        parsed = _parse_bracket_path(name)
+        if parsed is not None:
+            base, keys = parsed
+            if base not in self._df.columns:
+                raise _FilterExprError(
+                    f"Column {base!r} (from {name!r}) not found; available: {list(self._df.columns)}")
+
+            series = self._df[base]
+
+            def _extract(value):
+                v = value
+                for key in keys:
+                    if not isinstance(v, dict):
+                        return None
+                    v = v.get(key)
+                return v
+
+            return series.map(_extract)
+
+        # Fallback: treat as a plain column name (will raise if missing).
+        if name not in self._df.columns:
+            raise _FilterExprError(
+                f"Column {name!r} not found; available: {list(self._df.columns)}")
+        return self._df[name]
 
     @lark.v_args(inline=True)
     def gt(self, left, right):
