@@ -293,7 +293,7 @@ class TestLad:
     def test_lad_last_per_label(self, simple_frame):
         simple_frame.DEFAULT_TIME_LABEL = "time"
         simple_frame.LABEL_COL = "label"
-        lad = simple_frame.lad
+        lad = simple_frame.lad()
 
         assert set(lad["label"]) == {"a", "b"}
         for lbl in ["a", "b"]:
@@ -301,3 +301,14 @@ class TestLad:
             last_time = src["time"].max()
             lad_time = lad[lad["label"] == lbl]["time"].iloc[0]
             assert lad_time == last_time
+
+    def test_lad_value_latest_row_for_label(self, simple_frame):
+        simple_frame.DEFAULT_TIME_LABEL = "time"
+        simple_frame.LABEL_COL = "label"
+
+        row = simple_frame.lad(value="a")
+        src = simple_frame[simple_frame["label"] == "a"]
+        last_time = src["time"].max()
+
+        assert row["label"] == "a"
+        assert row["time"] == last_time

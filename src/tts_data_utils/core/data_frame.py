@@ -1757,25 +1757,53 @@ class TtsDataFrame(pd.DataFrame):
             raise ValueError("time_label must be provided or set as DEFAULT_TIME_LABEL on the class.")
         result = self[self[col] >= time] if inclusive else self[self[col] > time]
         return self._filter(result, minimum, maximum, exactly)
-    
-    @property
-    def lad(self):
-        """Return a LAD-style view: one row per label, last in time.
 
-        For each distinct value in ``LABEL_COL`` (``'name'``), this
-        selects the row whose ``DEFAULT_TIME_LABEL`` (``'scet'``) is
-        maximal and returns a new :class:`Oco2ChannelFrame` containing
-        just those rows.
+    def lad(self, value=None, *, label_col=None, time_col=None):
+        """LAD-style helper.
+
+        When ``value`` is None (default), return a LAD-style view: one
+        row per label, last in time — identical to the previous
+        :pyattr:`lad` property.
+
+        When ``value`` is not None, treat it as a label value and return
+        the latest row for that label using ``label_col`` (default
+        :attr:`LABEL_COL`) and ``time_col`` (default
+        :attr:`DEFAULT_TIME_LABEL`).
         """
-        label_col = self.LABEL_COL
-        time_col = self.DEFAULT_TIME_LABEL
+        label_col = label_col or self.LABEL_COL
+        time_col = time_col or self.DEFAULT_TIME_LABEL
 
-        if label_col not in self.columns or time_col not in self.columns:
-            return self.__class__(self.copy(), coerce=False, validate=False)
+        if label_col is None:
+            raise ValueError("LABEL_COL/label_col must be configured to use lad().")
 
-        # idx of max time per label
-        idx = self.groupby(label_col)[time_col].idxmax()
-        # Preserve original order of labels as they appear in the frame
-        idx = list(idx)
-        return self.__class__(self.loc[idx].copy(), coerce=False, validate=False)
-    
+        if value is None:
+            # Original LAD behavior: one row per label, last in time.
+            if label_col not in self.columns or time_col not in self.columns:
+                return self.__class__(self.copy(), coerce=False, validate=False)
+
+            idx = self.groupby(label_col)[time_col].idxmax()
+            idx = list(idx)  # Preserve original order of labels
+            return self.__class__(self.loc[idx].copy(), coerce=False, validate=False)
+
+        # value-specific path: latest row for the given label.
+        if label_col not in self.columns:
+            raise ValueError(f"Label column {label_col!r} not present in frame.")
+
+        df = self[self[label_col] == value]
+        if df.empty:
+            raise KeyError(f"Label {value!r} not found in {label_col!r}.")
+
+        if time_col is not None and time_col in df.columns:
+            idx = df[time_col].idxmax()
+            row = df.loc[idx]
+        else:
+            # Fall back to last row if no usable time column.
+            row = df.iloc[-1]
+
+        row.__class__ = self.ROW_SERIES_CLASS
+        return row
+
+    @property
+    def lad_view(self):
+        """Backward-compatible LAD property: one row per label, last in time."""
+        return self.lad(value=None)
