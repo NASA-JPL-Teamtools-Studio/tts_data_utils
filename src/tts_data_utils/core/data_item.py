@@ -7,6 +7,7 @@ import json
 try:
     from tts_dexter.core.dispo import Disposition, get_dispo_joiner, DISPO_FORMAT, DISPO_SEVERITY, PALETTE
     from tts_dexter.core.data import DISPO_CHOICE
+    from tts_dexter.core.row_mixin import DexterRowMixin
     DEXTER_PRESENT = True
 except ModuleNotFoundError:
     DEXTER_PRESENT = False
@@ -408,7 +409,11 @@ class DataItem(ABC):
         :param disposition: Disposition for whatever has happened to this DataItem
         :type disposition: Dexter Disposition
         """
-        self.dispositions.append(disposition)
+        # Delegate to shared DexterRowMixin implementation when available.
+        if DEXTER_PRESENT and isinstance(self, DexterRowMixin):
+            DexterRowMixin.add_dispo(self, disposition)
+        else:
+            self.dispositions.append(disposition)
 
     def new_dispo(self):
         """
@@ -418,6 +423,8 @@ class DataItem(ABC):
 
         TBD. Ask Nick Peper FMI        
         """
+        if DEXTER_PRESENT and isinstance(self, DexterRowMixin):
+            return DexterRowMixin.new_dispo(self)
         new_dispo = Disposition()
         self.dispositions.append(new_dispo)
         return new_dispo
@@ -432,6 +439,9 @@ class DataItem(ABC):
         :param dispo_choice: How would you like to roll up dispositions? FIST, LAST, ALL?
         :type dispo_choice: DISPO_CHOICE
         """        
+        if DEXTER_PRESENT and isinstance(self, DexterRowMixin):
+            return DexterRowMixin.choose_dispo(self, dispo_choice)
+
         all_dispositions = [_ for _ in self.dispositions if _.populated]
         if len(all_dispositions) == 0:
             if self.default_dispo is None:
@@ -460,6 +470,9 @@ class DataItem(ABC):
         :param dispo_format: HTML, EXCEL, TEXT
         :type dispo_format: DISPO_FORMATL
         """
+        if DEXTER_PRESENT and isinstance(self, DexterRowMixin):
+            return DexterRowMixin.choose_and_stamp(self, dispo_choice, dispo_format)
+
         dispos = self.choose_dispo(dispo_choice)
         if not dispos:
             return

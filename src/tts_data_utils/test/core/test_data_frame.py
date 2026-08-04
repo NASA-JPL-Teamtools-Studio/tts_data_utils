@@ -312,3 +312,17 @@ class TestLad:
 
         assert row["label"] == "a"
         assert row["time"] == last_time
+
+    def test_lad_value_returns_scalar(self, simple_frame):
+        simple_frame.DEFAULT_TIME_LABEL = "time"
+        simple_frame.LABEL_COL = "label"
+        simple_frame.VALUE_COL = "value"
+
+        # latest row for label "a" should have the max time and its value
+        src = simple_frame[simple_frame["label"] == "a"]
+        latest = src.loc[src["time"].idxmax()]
+
+        val = simple_frame.lad_value("a")
+
+        # Should be a bare scalar, matching the underlying value column
+        assert val == latest["value"]

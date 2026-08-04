@@ -11,6 +11,13 @@ from tts_data_utils.core.expr_engines import (
 )
 from tts_utilities.logger import create_logger
 
+try:
+    from tts_dexter.core.row_mixin import DexterRowMixin
+    DEXTER_PRESENT = True
+except ModuleNotFoundError:
+    DexterRowMixin = object
+    DEXTER_PRESENT = False
+
 logger = create_logger('tts_data_frame')
 
 class _TimerProxy:
@@ -36,10 +43,52 @@ class _TimerProxy:
                 return result
             return _timed
         return attr
+if DEXTER_PRESENT:
+    class TtsRowSeries(DexterRowMixin, pd.Series):
+        DICT_STAMP_KEY = 'disposition'
 
+        @property
+        def dispositions(self):
+            frame = getattr(self, '_frame', None)
+            if frame is not None:
+                store = getattr(frame, '_row_dispositions', None)
+                if store is None:
+                    store = {}
+                    frame._row_dispositions = store
+                key = self.name
+                if key not in store:
+                    store[key] = []
+                return store[key]
+            if not hasattr(self, '_dispositions'):
+                self._dispositions = []
+            return self._dispositions
 
-class TtsRowSeries(pd.Series):
-    pass
+        @dispositions.setter
+        def dispositions(self, value):
+            frame = getattr(self, '_frame', None)
+            if frame is not None:
+                store = getattr(frame, '_row_dispositions', None)
+                if store is None:
+                    store = {}
+                    frame._row_dispositions = store
+                store[self.name] = list(value)
+            else:
+                self._dispositions = list(value)
+
+        def stamp(self, dispo_value):
+            frame = getattr(self, '_frame', None)
+            if frame is not None:
+                col = self.DICT_STAMP_KEY
+                if col not in frame.columns:
+                    frame[col] = None
+                frame.loc[self.name, col] = dispo_value
+            else:
+                col = self.DICT_STAMP_KEY
+                self[col] = dispo_value
+else:
+    class TtsRowSeries(pd.Series):
+        pass
+
 
 class TtsColumnSeries(pd.Series):
     pass
@@ -62,9 +111,9 @@ def _is_scalar_selector(key):
 
 class _SeriesWrappingIndexer:
     """Wraps a pandas loc/iloc indexer to return typed Row/Column Series."""
-
-    def __init__(self, indexer, row_cls, col_cls):
+    def __init__(self, indexer, frame, row_cls, col_cls):
         self._indexer = indexer
+        self._frame = frame
         self._row_cls = row_cls
         self._col_cls = col_cls
 
@@ -74,6 +123,8 @@ class _SeriesWrappingIndexer:
                 result.__class__ = self._col_cls
             else:
                 result.__class__ = self._row_cls
+                if hasattr(result, '__dict__'):
+                    result._frame = self._frame
         return result
 
     def __getitem__(self, key):
@@ -88,6 +139,7 @@ class _SeriesWrappingIndexer:
     def __call__(self, *args, **kwargs):
         return _SeriesWrappingIndexer(
             self._indexer(*args, **kwargs),
+            self._frame,
             self._row_cls,
             self._col_cls,
         )
@@ -103,7 +155,7 @@ class TtsDataFrame(pd.DataFrame):
 
     # Attributes in this list are copied by pandas when creating new
     # objects via methods like .copy(), .loc, .sort_values(), etc.
-    _metadata = ["name", "metadata", "_subcontainers"]
+    _metadata = ["name", "metadata", "_subcontainers", "_row_dispositions"]
 
     # Optional associated row class for ergonomic row views (not used for typing).
     ROW_ITEM_CLS = None
@@ -170,6 +222,7 @@ class TtsDataFrame(pd.DataFrame):
         self._data_hash = None
         self._pivot_cache = None
         self._subcontainers = {}
+        self._row_dispositions = {}
 
         if coerce or validate:
             self._apply_schema(coerce=coerce, validate=validate)
@@ -619,21 +672,25 @@ class TtsDataFrame(pd.DataFrame):
 
     @property
     def loc(self):
-        return _SeriesWrappingIndexer(super().loc, self.ROW_SERIES_CLASS, self.COLUMN_SERIES_CLASS)
+        return _SeriesWrappingIndexer(super().loc, self, self.ROW_SERIES_CLASS, self.COLUMN_SERIES_CLASS)
 
     @property
     def iloc(self):
-        return _SeriesWrappingIndexer(super().iloc, self.ROW_SERIES_CLASS, self.COLUMN_SERIES_CLASS)
+        return _SeriesWrappingIndexer(super().iloc, self, self.ROW_SERIES_CLASS, self.COLUMN_SERIES_CLASS)
 
     def xs(self, key, axis=0, level=None, drop_level=True):
         result = super().xs(key, axis=axis, level=level, drop_level=drop_level)
         if isinstance(result, pd.Series):
             result.__class__ = self.ROW_SERIES_CLASS if axis in (0, 'index') else self.COLUMN_SERIES_CLASS
+            if axis in (0, 'index') and hasattr(result, '__dict__'):
+                result._frame = self
         return result
 
     def iterrows(self):
         for idx, row in super().iterrows():
             row.__class__ = self.ROW_SERIES_CLASS
+            if hasattr(row, '__dict__'):
+                row._frame = self
             yield idx, row
 
     def select_wide(
@@ -1807,3 +1864,29 @@ class TtsDataFrame(pd.DataFrame):
     def lad_view(self):
         """Backward-compatible LAD property: one row per label, last in time."""
         return self.lad(value=None)
+
+    def lad_value(self, value, *, label_col=None, time_col=None, value_col=None, as_native=True):
+        """Return the latest value for a given label as a scalar.
+
+        This is a convenience wrapper around :meth:`lad` that:
+
+        - looks up the latest row for the given label ``value``
+        - extracts the column specified by ``value_col`` (default
+          :attr:`VALUE_COL`)
+        - optionally converts 0-d arrays / pandas scalars to native
+          Python types when ``as_native`` is True.
+        """
+        value_col = value_col or self.VALUE_COL
+        row = self.lad(value=value, label_col=label_col, time_col=time_col)
+        scalar = row[value_col]
+
+        if as_native:
+            # Preserve None / NaN / non-scalar objects as-is.
+            try:
+                # pandas and numpy scalars have .item(); normal Python
+                # scalars will raise AttributeError and be returned
+                # unchanged.
+                return scalar.item()  # type: ignore[attr-defined]
+            except AttributeError:
+                return scalar
+        return scalar
