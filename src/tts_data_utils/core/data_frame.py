@@ -87,7 +87,7 @@ if DEXTER_PRESENT:
                 self[col] = dispo_value
 
         @property
-        def default_html_row_style(self):
+        def default_html_row_style(self) -> Dict:
             """CSS style dict applied to this row's <tr> in a PowerTable.
 
             Override in subclasses to drive conditional row coloring.
@@ -95,7 +95,7 @@ if DEXTER_PRESENT:
             return {}
 
         @property
-        def default_html_cell_styles(self):
+        def default_html_cell_styles(self) -> 'Dict[str, Dict]':
             """Per-column CSS style mapping for cells in a PowerTable.
 
             Return a dict of ``{column_name: css_dict}`` to style individual
@@ -105,7 +105,7 @@ if DEXTER_PRESENT:
 else:
     class TtsRowSeries(pd.Series):
         @property
-        def default_html_row_style(self):
+        def default_html_row_style(self) -> Dict:
             """CSS style dict applied to this row's <tr> in a PowerTable.
 
             Override in subclasses to drive conditional row coloring.
@@ -113,7 +113,7 @@ else:
             return {}
 
         @property
-        def default_html_cell_styles(self):
+        def default_html_cell_styles(self) -> 'Dict[str, Dict]':
             """Per-column CSS style mapping for cells in a PowerTable.
 
             Return a dict of ``{column_name: css_dict}`` to style individual
@@ -1913,9 +1913,17 @@ class TtsDataFrame(pd.DataFrame):
         row.__class__ = self.ROW_SERIES_CLASS
         return row
 
-    def power_table(self, superheader=None, columns=None, bypass_styles=False,
-                    row_styles=None, cell_styles=None, add_filters=None,
-                    add_sorting=None, **kwargs):
+    def power_table(
+        self,
+        superheader: Optional[str] = None,
+        columns: Optional[List[str]] = None,
+        bypass_styles: bool = False,
+        row_styles: Optional[List[Dict]] = None,
+        cell_styles: Optional[List[List[Dict]]] = None,
+        add_filters: Optional[str] = None,
+        add_sorting: Optional[str] = None,
+        **kwargs,
+    ) -> 'PowerTable':
         """Produce a rich, interactive HTML table via PowerTable.
 
         Mirrors ``DataContainer.power_table()``.  Each row is rendered using
@@ -1957,7 +1965,7 @@ class TtsDataFrame(pd.DataFrame):
 
         for ii, (idx, row_series) in enumerate(self.iterrows()):
             row_dict = {col: row_series.get(col) for col in repr_cols}
-            expand_content = self._get_subcontainer_html(idx, row_series)
+            expand_content = self._get_subcontainer_html_components(idx, row_series)
             row_data.append((row_dict, expand_content))
 
             base_row_style = {"background-color": "#EEEEEE"} if ii % 2 else {}
@@ -1996,13 +2004,17 @@ class TtsDataFrame(pd.DataFrame):
         table.add_header(column_names=repr_cols)
         return table
 
-    def _get_subcontainer_html(self, idx, row_series):
+    def _get_subcontainer_html_components(
+        self,
+        idx: object,
+        row_series: 'TtsRowSeries',
+    ) -> Optional[List]:
         """Return expandable sub-table content for a row, or None.
 
         Looks up :attr:`SUBCONTAINER_KEY` in ``_subcontainers``, renders
         any found nested frames via their own ``power_table()`` method, and
-        returns the list of rendered components (or None when the row has no
-        subcontainers).
+        returns the list of PowerTable component objects (or None when the row
+        has no subcontainers).
         """
         key_cfg = self.SUBCONTAINER_KEY
         subcontainers = getattr(self, "_subcontainers", None) or {}

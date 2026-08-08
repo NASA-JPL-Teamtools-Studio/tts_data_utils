@@ -5,6 +5,7 @@ import pytest
 
 from tts_html_utils.core.components.table import PowerTable
 from tts_data_utils.core.data_frame import TtsDataFrame, TtsRowSeries
+from tts_data_utils.test.core.inspection_utils import check_inspection_hash
 
 
 class SimpleFrame(TtsDataFrame):
@@ -261,11 +262,7 @@ class TestHumanInspectable:
 
         frame = TelemetryFrame(_RICH_DATA, coerce=False, validate=False)
 
-        detail_data = [{"time": _RICH_TIMES[0], "label": "raw_dn", "value": 4095, "unit": "DN"},
-                       {"time": _RICH_TIMES[1], "label": "raw_dn", "value": 4020, "unit": "DN"},
-                       {"time": _RICH_TIMES[2], "label": "raw_dn", "value": 3498, "unit": "DN"},
-                       {"time": _RICH_TIMES[3], "label": "raw_dn", "value": 2873, "unit": "DN"}]
-        detail_frame = SimpleFrame(detail_data, coerce=False, validate=False)
+        detail_frame = SimpleFrame(_TELEMETRY_DETAIL, coerce=False, validate=False)
         frame.set_subcontainer("battery_voltage", "raw DN readings", detail_frame)
 
         styled_table = frame.power_table(
@@ -286,3 +283,5 @@ class TestHumanInspectable:
         assert "battery_voltage" in content
         assert "FFCCCC" in content
         assert "raw DN readings" in content
+
+        check_inspection_hash(_ARTIFACT_PATH)
