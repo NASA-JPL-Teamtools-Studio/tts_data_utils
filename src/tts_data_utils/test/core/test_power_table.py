@@ -241,6 +241,7 @@ class TelemetryFrame(TtsDataFrame):
     ROW_SERIES_CLASS = TelemetryRowSeries
 
 
+@pytest.mark.human_review
 @pytest.mark.unreviewed_ai_generated_test
 class TestHumanInspectable:
     """Writes a full HtmlCompiler artifact for human visual inspection.

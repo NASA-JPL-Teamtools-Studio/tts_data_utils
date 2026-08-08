@@ -111,6 +111,7 @@ _EVR_DATA = [
 ]
 
 
+@pytest.mark.human_review
 @pytest.mark.unreviewed_ai_generated_test
 class TestAmpcsEhaInspection:
     """Writes a full HtmlCompiler artifact for AmpcsEhaFrame inspection.
@@ -162,6 +163,7 @@ class TestAmpcsEhaInspection:
         check_inspection_hash(_EHA_PATH)
 
 
+@pytest.mark.human_review
 @pytest.mark.unreviewed_ai_generated_test
 class TestAmpcsEvrInspection:
     """Writes a full HtmlCompiler artifact for AmpcsEvrFrame inspection.
