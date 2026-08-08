@@ -11,30 +11,25 @@ tts_data_utils.multimission.evr : legacy DataContainer/DataItem implementation
 
 from typing import Dict
 
+from tts_html_utils.core.palette import EvrPalette
 from tts_data_utils.core.data_frame import TtsDataFrame, TtsRowSeries
 
 
 class AmpcsEvrRowSeries(TtsRowSeries):
     """Row ergonomics for a single EVR event.
 
-    Colours the table row by severity level.  Higher severity = warmer colour.
+    Delegates row colouring to :data:`EvrPalette` — the canonical source of
+    EVR level colours shared with the legacy EvrItem/EvrContainer path.
     """
-
-    _LEVEL_COLORS: Dict[str, Dict] = {
-        "FATAL":       {"background-color": "#FF9999"},
-        "WARNING_HI":  {"background-color": "#FFCCCC"},
-        "WARNING_LO":  {"background-color": "#FFE4CC"},
-        "ACTIVITY_HI": {"background-color": "#FFFACC"},
-        "ACTIVITY_LO": {"background-color": "#FFFFF0"},
-        "COMMAND":     {"background-color": "#CCE5FF"},
-        "DIAGNOSTIC":  {},
-    }
 
     @property
     def default_html_row_style(self) -> Dict:
-        """Row background based on EVR severity level."""
+        """Row style sourced from EvrPalette, keyed by EVR severity level."""
         level = self.get("level", "DIAGNOSTIC")
-        return self._LEVEL_COLORS.get(level, {})
+        try:
+            return EvrPalette[level]
+        except KeyError:
+            return {}
 
     @property
     def default_html_cell_styles(self) -> 'Dict[str, Dict]':

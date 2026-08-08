@@ -205,7 +205,7 @@ class TestAmpcsEvrInspection:
         assert _EVR_PATH.stat().st_size > 0
         content = _EVR_PATH.read_text()
         assert "CDH_REBOOT" in content
-        assert "FF9999" in content
+        assert "FF5E66" in content
         assert "WARNING_HI" in content
 
         check_inspection_hash(_EVR_PATH)
