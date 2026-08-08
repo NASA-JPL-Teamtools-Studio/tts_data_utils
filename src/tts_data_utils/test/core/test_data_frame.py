@@ -8,7 +8,8 @@ import pytest
 
 #This Library Imports
 from tts_data_utils.core.data_frame import TtsDataFrame, _FilterExprError, _MathExprError
-
+from tts_dexter.core.data import DISPO_CHOICE
+from tts_dexter.core.dispo import DISPO_FORMAT
 
 class MockFrame(TtsDataFrame):
     DEFAULT_TIME_LABEL = "time"
@@ -326,3 +327,39 @@ class TestLad:
 
         # Should be a bare scalar, matching the underlying value column
         assert val == latest["value"]
+
+@pytest.mark.unreviewed_ai_generated_test
+class TestDexterRowBehavior:
+    def test_row_dispositions_and_stamp(self, simple_frame):
+        df = simple_frame.copy()
+        # Take a row via loc (ensures _frame is attached)
+        row = df.loc[df.index[0]]
+        # Create dispositions and stamp
+        dispo = row.new_dispo()
+        dispo.expected("OK")
+        row.choose_and_stamp(DISPO_CHOICE.ALL, DISPO_FORMAT.HTML)
+
+        # Disposition column should now exist and have a non-empty value
+        assert "disposition" in df.columns
+        assert df.loc[df.index[0], "disposition"]
+
+        # Frame-level store should know about this row
+        dispos = df.get_row_dispositions(df.index[0])
+        assert len(dispos) == 1
+
+    def test_row_dispositions_pruned_on_filter(self, simple_frame):
+        df = simple_frame.copy()
+        # Add a disposition on first row
+        idx0 = df.index[0]
+        row0 = df.loc[idx0]
+        row0.new_dispo().expected("OK")
+        row0.choose_and_stamp(DISPO_CHOICE.ALL, DISPO_FORMAT.HTML)
+
+        # Filter to drop the first row
+        df2 = df[df["label"] == "b"].copy()
+
+        # First index should no longer be present
+        assert idx0 not in df2.index
+        # And its dispositions should be pruned
+        all_dispos = df2.get_row_dispositions()
+        assert idx0 not in all_dispos

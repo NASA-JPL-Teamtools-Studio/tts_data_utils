@@ -319,16 +319,17 @@ evrs.after(t_start, inclusive=True)
 
 # Dict-valued column (e.g. extracted EVR arguments)
 evrs.dict_key_eq('arguments', 'port', 8080)
+evrs.eq('arguments["port"]', 8080)
 ```
 
 All of these accept optional `minimum`, `maximum`, and `exactly` keyword arguments to assert the result count — useful for defensive scripting in ops pipelines:
 
 ```python
 # Raises if fewer than 1 row matches
-root_cause = evrs.eq('message_id', 0x4A2F, minimum=1)
+error_evrs = evrs.eq('message_id', 0x4A2F, minimum=1)
 
 # Raises if not exactly 1 row
-launch_evr = evrs.eq('message_id', 0x0001, exactly=1)
+success_evr = evrs.eq('message_id', 0x0001, exactly=1)
 ```
 
 Domain methods defined on the frame subclass (Section 3) layer mission vocabulary on top of these and are a great complement:
