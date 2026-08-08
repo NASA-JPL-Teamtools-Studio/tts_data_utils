@@ -85,9 +85,41 @@ if DEXTER_PRESENT:
             else:
                 col = self.DICT_STAMP_KEY
                 self[col] = dispo_value
+
+        @property
+        def default_html_row_style(self):
+            """CSS style dict applied to this row's <tr> in a PowerTable.
+
+            Override in subclasses to drive conditional row coloring.
+            """
+            return {}
+
+        @property
+        def default_html_cell_styles(self):
+            """Per-column CSS style mapping for cells in a PowerTable.
+
+            Return a dict of ``{column_name: css_dict}`` to style individual
+            cells. Override in subclasses to drive conditional cell formatting.
+            """
+            return {}
 else:
     class TtsRowSeries(pd.Series):
-        pass
+        @property
+        def default_html_row_style(self):
+            """CSS style dict applied to this row's <tr> in a PowerTable.
+
+            Override in subclasses to drive conditional row coloring.
+            """
+            return {}
+
+        @property
+        def default_html_cell_styles(self):
+            """Per-column CSS style mapping for cells in a PowerTable.
+
+            Return a dict of ``{column_name: css_dict}`` to style individual
+            cells. Override in subclasses to drive conditional cell formatting.
+            """
+            return {}
 
 
 class TtsColumnSeries(pd.Series):
@@ -600,6 +632,16 @@ class TtsDataFrame(pd.DataFrame):
             object.__setattr__(self, '_subcontainers', {})
         else:
             object.__setattr__(self, '_subcontainers', dict(self._subcontainers))
+        dispo_store = getattr(self, '_row_dispositions', None)
+        if dispo_store is None:
+            object.__setattr__(self, '_row_dispositions', {})
+        else:
+            live_keys = set(self.index)
+            object.__setattr__(
+                self,
+                '_row_dispositions',
+                {k: list(v) for k, v in dispo_store.items() if k in live_keys},
+            )
         key_cfg = self.SUBCONTAINER_KEY
         if self._subcontainers and key_cfg is not None:
             before = len(self._subcontainers)
@@ -663,6 +705,12 @@ class TtsDataFrame(pd.DataFrame):
             self._subcontainers[row_key] = {}
         self._subcontainers[row_key][name] = container
 
+    def get_row_dispositions(self, row_key=None):
+        store = getattr(self, '_row_dispositions', None) or {}
+        if row_key is None:
+            return store
+        return store.get(row_key, [])
+
     def __getitem__(self, key):
         result = super().__getitem__(key)
         if isinstance(result, pd.Series):
@@ -692,6 +740,11 @@ class TtsDataFrame(pd.DataFrame):
             if hasattr(row, '__dict__'):
                 row._frame = self
             yield idx, row
+
+    def stamp_all(self, dispo_choice, dispo_format):
+        """Apply dispositions to every row, mirroring DataContainer.stamp_all."""
+        for _, row in self.iterrows():
+            row.choose_and_stamp(dispo_choice, dispo_format)
 
     def select_wide(
         self,
@@ -1860,10 +1913,123 @@ class TtsDataFrame(pd.DataFrame):
         row.__class__ = self.ROW_SERIES_CLASS
         return row
 
-    @property
-    def lad_view(self):
-        """Backward-compatible LAD property: one row per label, last in time."""
-        return self.lad(value=None)
+    def power_table(self, superheader=None, columns=None, bypass_styles=False,
+                    row_styles=None, cell_styles=None, add_filters=None,
+                    add_sorting=None, **kwargs):
+        """Produce a rich, interactive HTML table via PowerTable.
+
+        Mirrors ``DataContainer.power_table()``.  Each row is rendered using
+        the associated :class:`TtsRowSeries` subclass, so subclasses can
+        drive per-row and per-cell CSS by overriding
+        :attr:`~TtsRowSeries.default_html_row_style` and
+        :attr:`~TtsRowSeries.default_html_cell_styles`.
+
+        Parameters
+        ----------
+        superheader : str or None
+            Title row spanning the full table width.
+        columns : list[str] or None
+            Columns to include.  Defaults to all columns.
+        bypass_styles : bool
+            When True, all row- and cell-level CSS is suppressed.
+        row_styles : list[dict] or None
+            Explicit CSS for each row.  Must match frame length.
+        cell_styles : list[list[dict]] or None
+            Explicit CSS for each cell in each row.
+        add_filters : str or None
+            Enable column filtering (``'local'``, ``'django'``, or None).
+        add_sorting : str or None
+            Enable column sorting (``'local'``, ``'django'``, or None).
+        **kwargs
+            Passed through to :class:`~tts_html_utils.core.components.table.PowerTable`.
+
+        Returns
+        -------
+        PowerTable
+        """
+        from tts_html_utils.core.components.table import PowerTable
+
+        repr_cols = list(columns) if columns is not None else list(self.columns)
+
+        row_data = []
+        auto_row_styles = []
+        auto_cell_styles = []
+
+        for ii, (idx, row_series) in enumerate(self.iterrows()):
+            row_dict = {col: row_series.get(col) for col in repr_cols}
+            expand_content = self._get_subcontainer_html(idx, row_series)
+            row_data.append((row_dict, expand_content))
+
+            base_row_style = {"background-color": "#EEEEEE"} if ii % 2 else {}
+            auto_row_styles.append({**base_row_style, **row_series.default_html_row_style})
+
+            per_cell = row_series.default_html_cell_styles
+            auto_cell_styles.append([per_cell.get(col, {}) for col in repr_cols])
+
+        if bypass_styles:
+            final_row_styles = [{} for _ in row_data]
+            final_cell_styles = [[{} for _ in repr_cols] for _ in row_data]
+        else:
+            if row_styles is not None:
+                if len(row_styles) != len(row_data):
+                    raise ValueError(
+                        f"row_styles length ({len(row_styles)}) must match "
+                        f"the number of rows ({len(row_data)})"
+                    )
+                final_row_styles = row_styles
+            else:
+                final_row_styles = auto_row_styles
+
+            final_cell_styles = cell_styles if cell_styles is not None else auto_cell_styles
+
+        table = PowerTable(
+            column_fields=repr_cols,
+            row_data=row_data,
+            row_styles=final_row_styles,
+            cell_styles=final_cell_styles,
+            add_filters=add_filters,
+            add_sorting=add_sorting,
+            **kwargs
+        )
+        if superheader:
+            table.add_superheader(superheader)
+        table.add_header(column_names=repr_cols)
+        return table
+
+    def _get_subcontainer_html(self, idx, row_series):
+        """Return expandable sub-table content for a row, or None.
+
+        Looks up :attr:`SUBCONTAINER_KEY` in ``_subcontainers``, renders
+        any found nested frames via their own ``power_table()`` method, and
+        returns the list of rendered components (or None when the row has no
+        subcontainers).
+        """
+        key_cfg = self.SUBCONTAINER_KEY
+        subcontainers = getattr(self, "_subcontainers", None) or {}
+        if not key_cfg or not subcontainers:
+            return None
+
+        if key_cfg == "pandas_index":
+            row_key = idx
+        elif isinstance(key_cfg, str):
+            row_key = row_series.get(key_cfg)
+        else:
+            row_key = tuple(row_series.get(c) for c in key_cfg)
+
+        sub = subcontainers.get(row_key, {})
+        if not sub:
+            return None
+
+        subtables = [
+            container.power_table(name)
+            for name, container in sub.items()
+            if hasattr(container, "power_table")
+        ]
+        return subtables if subtables else None
+
+    def _repr_html_(self):
+        """Jupyter/IPython hook: render this frame as a styled PowerTable."""
+        return self.power_table().render()
 
     def lad_value(self, value, *, label_col=None, time_col=None, value_col=None, as_native=True):
         """Return the latest value for a given label as a scalar.
