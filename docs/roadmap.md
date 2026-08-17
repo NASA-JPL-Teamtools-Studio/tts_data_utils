@@ -4,7 +4,7 @@ Prioritized list of features and architectural work for `tts_data_utils`. Items 
 
 ---
 
-## 1. PowerTable → TtsDataFrame (High Priority)
+## ~~1. PowerTable → TtsDataFrame~~ ✅ Done
 
 **What:** Wire `tts_html_utils.PowerTable` to work with `TtsDataFrame` subclasses, providing:
 - Styled HTML table rendering with color-coded rows (driven by domain logic on `TtsRowSeries`)
@@ -32,16 +32,35 @@ Prioritized list of features and architectural work for `tts_data_utils`. Items 
 
 ---
 
-## 3. AmpcsEha / AmpcsEvr Migration (Medium Priority)
+## ~~3. AmpcsEha / AmpcsEvr Migration~~ ✅ Done (EVR)
 
 **What:** Migrate `multimission/eha.py` and `multimission/evr.py` from `DataContainer`/`DataItem` to `TtsDataFrame`. Place the new classes in `multimission/ampcs/` as `AmpcsEhaFrame` and `AmpcsEvrFrame`.
 
 **Why:** The multimission EHA/EVR types are the most widely used data types in the ecosystem. Renaming to `Ampcs*` also clarifies that these are specific to the AMPCS ground system, reducing confusion for users on other ground systems (MGSS, FPrime, etc.).
 
 **Notes:**
+- `AmpcsEvrFrame` is complete in `multimission/ampcs/evr.py`, extending `TtsLogFrame`
+- `DemosatEvrFrame` added to `demosat_data_utils` as the reference implementation
 - Leave `EhaContainer`/`EvrContainer` in place for backward compatibility — do not delete
 - The `multimission/ampcs/` subdirectory establishes a pattern for future ground system groupings (`multimission/fprime/`, `multimission/yamcs/`, etc.)
-- `demosat_data_utils` should be updated to use the new `Ampcs*Frame` types as reference implementation
+- **Remaining:** `AmpcsEhaFrame` (`multimission/ampcs/eha.py`) is not yet implemented
+
+---
+
+## 3b. TtsLogFrame — General Log / EVR Base ✅ Done
+
+**What:** `TtsLogFrame` in `tts_data_utils.core.log` is the base class for any tabular log data (EVRs, FSW logs, ground system messages).  Establishes the long-form contract (`LABEL_COL`, `VALUE_COL`, `LEVEL_COL`), common filtering helpers (`filter_level`, `filter_above_level`, `filter_label`, `search`), frame-driven query protocol (`FILTER_COLS`), and row-coloring via `TtsLogRowSeries`.
+
+**Implemented:**
+- `tts_data_utils.core.log`: `TtsLogFrame` + `TtsLogRowSeries`
+- `tts_data_utils.multimission.ampcs.evr`: `AmpcsEvrFrame(TtsLogFrame)` + `gaps()`
+- `fss_data_utils.data_frame`: `FssEvrFrame(TtsLogFrame)` + `FssEvrRowSeries`
+- `demosat_data_utils.evr`: `DemosatEvrFrame(AmpcsEvrFrame)` + `DemosatEvrRowSeries`
+
+**Remaining (follow-on tickets):**
+- T5: `fss_query.get_evrs()` FILTER_COLS-driven filtering
+- T9: `tts_dtat` LogExplorer widget
+- T10/T11: `fss_dtat` / `demosat_dtat` starter-kit repos
 
 ---
 
