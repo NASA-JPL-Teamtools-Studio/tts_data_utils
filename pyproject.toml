@@ -40,6 +40,12 @@ package-dir = {"" = "src"}
 where = ["src"]
 
 
+[tool.pytest.ini_options]
+markers = [
+    "human_review: test produces visual output requiring human inspection and certification before passing",
+    "unreviewed_ai_generated_test: test was written by an AI agent and has not yet been reviewed by a human",
+]
+
 [tool.setuptools_scm]
 version_scheme = "guess-next-dev"
 local_scheme = "no-local-version"

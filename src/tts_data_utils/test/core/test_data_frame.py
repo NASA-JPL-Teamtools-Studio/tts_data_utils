@@ -8,7 +8,8 @@ import pytest
 
 #This Library Imports
 from tts_data_utils.core.data_frame import TtsDataFrame, _FilterExprError, _MathExprError
-
+from tts_dexter.core.data import DISPO_CHOICE
+from tts_dexter.core.dispo import DISPO_FORMAT
 
 class MockFrame(TtsDataFrame):
     DEFAULT_TIME_LABEL = "time"
@@ -135,6 +136,17 @@ class TestFilterExpr:
         with pytest.raises(_FilterExprError):
             simple_frame.filter_expr("does_not_exist > 0")
 
+    def test_filter_expr_in_not_in(self, simple_frame):
+        df_in = simple_frame.filter_expr("label in ['a']")
+        assert set(df_in["label"]) == {"a"}
+
+        df_not_in = simple_frame.filter_expr("label not in ['a']")
+        assert set(df_not_in["label"]) == {"b"}
+
+        # Combined boolean logic with membership
+        df_combined = simple_frame.filter_expr("(label in ['a'] and value > 2) or label in ['b']")
+        assert set(df_combined["label"]) == {"a", "b"}
+
 
 @pytest.mark.unreviewed_ai_generated_test
 class TestAtTimesWhere:
@@ -163,6 +175,12 @@ class TestAtTimesWhere:
         with pytest.raises(_FilterExprError):
             simple_frame.at_times_where("missing_label > 0")
 
+    def test_at_times_where_in_list(self, simple_frame):
+        # Use membership on label-based expressions; here just a simple value list
+        df = simple_frame.at_times_where("a in [3, 5]")
+        assert set(df["label"]) == {"a"}
+        assert set(df["value"]) == {3.0, 5.0}
+
 
 @pytest.mark.unreviewed_ai_generated_test
 class TestDeriveValues:
@@ -189,6 +207,24 @@ class TestDeriveValues:
     def test_derive_values_bad_label(self, simple_frame):
         with pytest.raises(_MathExprError):
             simple_frame.derive_values("derived = missing + 1", index_col="time", label_col="label", value_col="value")
+
+    def test_derive_values_in_operator(self, simple_frame):
+        # Build a frame with matching timestamps for labels 'a' and 'b'
+        times = [datetime(2020, 1, 1) + timedelta(seconds=i) for i in range(3)]
+        data = []
+        for i, t in enumerate(times):
+            data.append({"time": t, "label": "a", "value": float(i + 1), "meta": {"k": 1}})
+            data.append({"time": t, "label": "b", "value": float((i + 1) * 2), "meta": {"k": 2}})
+
+        frame = MockFrame(data, coerce=False, validate=False)
+        expr = "derived = a in [1, 3] and b > 2"
+        df = frame.derive_values(expr, index_col="time", label_col="label", value_col="value", timeout=0)
+
+        assert set(df["label"]) == {"derived"}
+        # a values: [1,2,3], b values: [2,4,6]
+        # derived is True only at t2 where a=3 and b>2
+        results = df.sort_values("time")["value"].tolist()
+        assert results == [False, False, True]
 
 
 @pytest.mark.unreviewed_ai_generated_test
@@ -226,11 +262,39 @@ class TestHelpers:
 
 
 @pytest.mark.unreviewed_ai_generated_test
+class TestInspectExprLanguage:
+    def test_inspect_expr_language_structure(self, simple_frame):
+        info = simple_frame.inspect_expr_language()
+
+        assert "math_engine" in info
+        assert "math_transformer" in info
+        assert "math_functions" in info
+        assert "math_keywords" in info
+        assert "filter_engine" in info
+        assert "filter_keywords" in info
+
+        math_funcs = info["math_functions"]
+        assert "abs" in math_funcs
+
+        math_bool = info["math_keywords"]["boolean"]
+        assert {"and", "or", "not"}.issubset(math_bool)
+
+        math_cmp = info["math_keywords"]["comparison"]
+        assert {">", ">=", "<", "<=", "==", "!=", "in"}.issubset(math_cmp)
+
+        filter_bool = info["filter_keywords"]["boolean"]
+        assert {"and", "or", "not"}.issubset(filter_bool)
+
+        filter_cmp = info["filter_keywords"]["comparison"]
+        assert {">", ">=", "<", "<=", "==", "!=", "is", "is not", "in", "not in"}.issubset(filter_cmp)
+
+
+@pytest.mark.unreviewed_ai_generated_test
 class TestLad:
     def test_lad_last_per_label(self, simple_frame):
         simple_frame.DEFAULT_TIME_LABEL = "time"
         simple_frame.LABEL_COL = "label"
-        lad = simple_frame.lad
+        lad = simple_frame.lad()
 
         assert set(lad["label"]) == {"a", "b"}
         for lbl in ["a", "b"]:
@@ -238,3 +302,64 @@ class TestLad:
             last_time = src["time"].max()
             lad_time = lad[lad["label"] == lbl]["time"].iloc[0]
             assert lad_time == last_time
+
+    def test_lad_value_latest_row_for_label(self, simple_frame):
+        simple_frame.DEFAULT_TIME_LABEL = "time"
+        simple_frame.LABEL_COL = "label"
+
+        row = simple_frame.lad(value="a")
+        src = simple_frame[simple_frame["label"] == "a"]
+        last_time = src["time"].max()
+
+        assert row["label"] == "a"
+        assert row["time"] == last_time
+
+    def test_lad_value_returns_scalar(self, simple_frame):
+        simple_frame.DEFAULT_TIME_LABEL = "time"
+        simple_frame.LABEL_COL = "label"
+        simple_frame.VALUE_COL = "value"
+
+        # latest row for label "a" should have the max time and its value
+        src = simple_frame[simple_frame["label"] == "a"]
+        latest = src.loc[src["time"].idxmax()]
+
+        val = simple_frame.lad_value("a")
+
+        # Should be a bare scalar, matching the underlying value column
+        assert val == latest["value"]
+
+@pytest.mark.unreviewed_ai_generated_test
+class TestDexterRowBehavior:
+    def test_row_dispositions_and_stamp(self, simple_frame):
+        df = simple_frame.copy()
+        # Take a row via loc (ensures _frame is attached)
+        row = df.loc[df.index[0]]
+        # Create dispositions and stamp
+        dispo = row.new_dispo()
+        dispo.expected("OK")
+        row.choose_and_stamp(DISPO_CHOICE.ALL, DISPO_FORMAT.HTML)
+
+        # Disposition column should now exist and have a non-empty value
+        assert "disposition" in df.columns
+        assert df.loc[df.index[0], "disposition"]
+
+        # Frame-level store should know about this row
+        dispos = df.get_row_dispositions(df.index[0])
+        assert len(dispos) == 1
+
+    def test_row_dispositions_pruned_on_filter(self, simple_frame):
+        df = simple_frame.copy()
+        # Add a disposition on first row
+        idx0 = df.index[0]
+        row0 = df.loc[idx0]
+        row0.new_dispo().expected("OK")
+        row0.choose_and_stamp(DISPO_CHOICE.ALL, DISPO_FORMAT.HTML)
+
+        # Filter to drop the first row
+        df2 = df[df["label"] == "b"].copy()
+
+        # First index should no longer be present
+        assert idx0 not in df2.index
+        # And its dispositions should be pruned
+        all_dispos = df2.get_row_dispositions()
+        assert idx0 not in all_dispos

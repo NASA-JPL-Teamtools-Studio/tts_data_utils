@@ -1,5 +1,6 @@
 import lark
 import numpy as np
+import re
 
 
 class _FilterExprError(Exception):
@@ -14,11 +15,13 @@ class _FilterTransformer(lark.Transformer):
 
     @lark.v_args(inline=True)
     def int_val(self, tok):
-        return int(tok)
+        # Allow Python-style underscores in integer literals
+        return int(str(tok).replace("_", ""))
 
     @lark.v_args(inline=True)
     def float_val(self, tok):
-        return float(tok)
+        # Allow Python-style underscores in float literals
+        return float(str(tok).replace("_", ""))
 
     @lark.v_args(inline=True)
     def string_val(self, tok):
@@ -39,6 +42,67 @@ class _FilterTransformer(lark.Transformer):
     @lark.v_args(inline=True)
     def column(self, tok):
         name = str(tok)
+        # Direct column hit.
+        if name in self._df.columns:
+            return self._df[name]
+
+        def _parse_bracket_path(spec):
+            s = spec
+            n = len(s)
+            if n == 0:
+                return None
+            # Parse leading NAME (Python identifier style)
+            i = 0
+            if not (s[0].isalpha() or s[0] == "_"):
+                return None
+            i += 1
+            while i < n and (s[i].isalnum() or s[i] == "_"):
+                i += 1
+            base = s[:i]
+            keys = []
+            while i < n:
+                if s[i] != "[":
+                    return None
+                i += 1
+                if i >= n or s[i] not in ("'", '"'):
+                    return None
+                quote = s[i]
+                i += 1
+                start = i
+                while i < n and s[i] != quote:
+                    i += 1
+                if i >= n:
+                    return None
+                key = s[start:i]
+                keys.append(key)
+                i += 1  # skip closing quote
+                if i >= n or s[i] != "]":
+                    return None
+                i += 1  # skip closing bracket
+            if i != n:
+                return None
+            return base, keys
+
+        parsed = _parse_bracket_path(name)
+        if parsed is not None:
+            base, keys = parsed
+            if base not in self._df.columns:
+                raise _FilterExprError(
+                    f"Column {base!r} (from {name!r}) not found; available: {list(self._df.columns)}")
+
+            series = self._df[base]
+
+            def _extract(value):
+                v = value
+                for key in keys:
+                    if not isinstance(v, dict):
+                        return None
+                    v = v.get(key)
+                return v
+
+            return series.map(_extract)
+
+        # Fallback: treat as a plain column name (will raise if missing).
         if name not in self._df.columns:
             raise _FilterExprError(
                 f"Column {name!r} not found; available: {list(self._df.columns)}")
@@ -81,16 +145,69 @@ class _FilterTransformer(lark.Transformer):
         return left != right
 
     @lark.v_args(inline=True)
-    def and_(self, left, right):
+    def and_(self, *children):
+        # Accept either (left, right) or (left, AND_KW, right)
+        if len(children) == 2:
+            left, right = children
+        elif len(children) == 3:
+            left, _op, right = children
+        else:  # pragma: no cover - defensive
+            raise TypeError(f"_FilterTransformer.and_ expected 2 or 3 args, got {len(children)}")
         return left & right
 
     @lark.v_args(inline=True)
-    def or_(self, left, right):
+    def or_(self, *children):
+        # Accept either (left, right) or (left, OR_KW, right)
+        if len(children) == 2:
+            left, right = children
+        elif len(children) == 3:
+            left, _op, right = children
+        else:  # pragma: no cover - defensive
+            raise TypeError(f"_FilterTransformer.or_ expected 2 or 3 args, got {len(children)}")
         return left | right
 
     @lark.v_args(inline=True)
-    def not_(self, operand):
+    def not_(self, *children):
+        # Accept either (operand,) or (NOT_KW, operand)
+        if len(children) == 1:
+            (operand,) = children
+        elif len(children) == 2:
+            _op, operand = children
+        else:  # pragma: no cover - defensive
+            raise TypeError(f"_FilterTransformer.not_ expected 1 or 2 args, got {len(children)}")
         return ~operand
+
+    @lark.v_args(inline=True)
+    def list(self, *items):
+        return list(items)
+
+    @lark.v_args(inline=True)
+    def in_(self, *children):
+        # Accept (left, right) or (left, IN_KW, right)
+        if len(children) == 2:
+            left, right = children
+        elif len(children) == 3:
+            left, _op, right = children
+        else:  # pragma: no cover - defensive
+            raise TypeError(f"_FilterTransformer.in_ expected 2 or 3 args, got {len(children)}")
+        if hasattr(left, "isin"):
+            return left.isin(right)
+        return left in right
+
+    @lark.v_args(inline=True)
+    def not_in(self, *children):
+        # Accept (left, right) or (left, NOT_KW, IN_KW, right)
+        if len(children) == 2:
+            left, right = children
+        elif len(children) == 3:
+            left, _op, right = children
+        elif len(children) == 4:
+            left, _not_kw, _in_kw, right = children
+        else:  # pragma: no cover - defensive
+            raise TypeError(f"_FilterTransformer.not_in expected 2-4 args, got {len(children)}")
+        if hasattr(left, "isin"):
+            return ~left.isin(right)
+        return left not in right
 
 
 class _ParsedFilter:
@@ -116,26 +233,36 @@ class _FilterEngine:
         %import unicode.WS
         %ignore WS
 
-        %import common (SIGNED_INT, SIGNED_FLOAT)
+        AND_KW: "and"
+        OR_KW:  "or"
+        NOT_KW: "not"
+        IN_KW:  "in"
+
+        // Numeric literals: allow underscores like Python (e.g. 3_600_000)
+        SIGNED_FLOAT: /[+-]?(?:\d(?:_?\d)*\.\d(?:_?\d)*(?:[eE][+-]?\d(?:_?\d)*)?|\d(?:_?\d)*[eE][+-]?\d(?:_?\d)*)/
+        SIGNED_INT:   /[+-]?\d(?:_?\d)*/
+
         %import common.CNAME -> NAME
 
-        STRING:     "\"" /[^"]*/ "\"" | "'" /[^']*/ "'"
+        STRING:     "\"" /[^\"]*/ "\"" | "'" /[^']*/ "'"
         NULL_KW:    "None" | "null" | "none"
         BOOL_TRUE:  "True" | "true"
         BOOL_FALSE: "False" | "false"
+
+        list: "[" [atom ("," atom)*] "]"
 
         ?start: expr
 
         ?expr: or_expr
 
         ?or_expr: and_expr
-            | or_expr "or" and_expr   -> or_
+            | or_expr OR_KW and_expr   -> or_
 
         ?and_expr: not_expr
-            | and_expr "and" not_expr -> and_
+            | and_expr AND_KW not_expr -> and_
 
         ?not_expr: comparison
-            | "not" not_expr          -> not_
+            | NOT_KW not_expr          -> not_
 
         ?comparison: atom
             | atom ">"  atom          -> gt
@@ -146,6 +273,8 @@ class _FilterEngine:
             | atom "!=" atom          -> ne
             | atom "is" "not" atom    -> is_not
             | atom "is" atom          -> is_
+            | atom IN_KW list          -> in_
+            | atom NOT_KW IN_KW list   -> not_in
 
         ?atom: SIGNED_INT             -> int_val
             | SIGNED_FLOAT            -> float_val
@@ -185,10 +314,14 @@ class _MathTransformer(lark.Transformer):
         self._values = values
 
     @lark.v_args(inline=True)
-    def int_val(self, tok): return int(tok)
+    def int_val(self, tok):
+        # Allow Python-style underscores in integer literals
+        return int(str(tok).replace("_", ""))
 
     @lark.v_args(inline=True)
-    def float_val(self, tok): return float(tok)
+    def float_val(self, tok):
+        # Allow Python-style underscores in float literals
+        return float(str(tok).replace("_", ""))
 
     @lark.v_args(inline=True)
     def string_val(self, tok):
@@ -226,6 +359,9 @@ class _MathTransformer(lark.Transformer):
     def div(self, l, r): return l / r
 
     @lark.v_args(inline=True)
+    def floordiv(self, l, r): return l // r
+
+    @lark.v_args(inline=True)
     def neg(self, val): return -val
 
     @lark.v_args(inline=True)
@@ -251,16 +387,55 @@ class _MathTransformer(lark.Transformer):
     @lark.v_args(inline=True)
     def ne(self, l, r): return l != r
 
+    @lark.v_args(inline=True)
+    def list(self, *items):
+        return list(items)
+
+    @lark.v_args(inline=True)
+    def in_(self, *children):
+        # Accept (left, right) or (left, IN_KW, right)
+        if len(children) == 2:
+            l, r = children
+        elif len(children) == 3:
+            l, _op, r = children
+        else:  # pragma: no cover - defensive
+            raise TypeError(f"_MathTransformer.in_ expected 2 or 3 args, got {len(children)}")
+        return l in r
+
     # Boolean combinators (operate on scalar booleans)
 
     @lark.v_args(inline=True)
-    def and_(self, l, r): return l and r
+    def and_(self, *children):
+        # Accept (left, right) or (left, AND_KW, right)
+        if len(children) == 2:
+            l, r = children
+        elif len(children) == 3:
+            l, _op, r = children
+        else:  # pragma: no cover - defensive
+            raise TypeError(f"_MathTransformer.and_ expected 2 or 3 args, got {len(children)}")
+        return l and r
 
     @lark.v_args(inline=True)
-    def or_(self, l, r): return l or r
+    def or_(self, *children):
+        # Accept (left, right) or (left, OR_KW, right)
+        if len(children) == 2:
+            l, r = children
+        elif len(children) == 3:
+            l, _op, r = children
+        else:  # pragma: no cover - defensive
+            raise TypeError(f"_MathTransformer.or_ expected 2 or 3 args, got {len(children)}")
+        return l or r
 
     @lark.v_args(inline=True)
-    def not_(self, v): return not v
+    def not_(self, *children):
+        # Accept (operand,) or (NOT_KW, operand)
+        if len(children) == 1:
+            (v,) = children
+        elif len(children) == 2:
+            _op, v = children
+        else:  # pragma: no cover - defensive
+            raise TypeError(f"_MathTransformer.not_ expected 1 or 2 args, got {len(children)}")
+        return not v
 
 
 class _ParsedMath:
@@ -287,10 +462,20 @@ class _MathEngine:
         %import unicode.WS
         %ignore WS
 
-        %import common (SIGNED_INT, SIGNED_FLOAT)
+        AND_KW: "and"
+        OR_KW:  "or"
+        NOT_KW: "not"
+        IN_KW:  "in"
+
+        // Numeric literals: allow underscores like Python (e.g. 3_600_000)
+        SIGNED_FLOAT: /[+-]?(?:\d(?:_?\d)*\.\d(?:_?\d)*(?:[eE][+-]?\d(?:_?\d)*)?|\d(?:_?\d)*[eE][+-]?\d(?:_?\d)*)/
+        SIGNED_INT:   /[+-]?\d(?:_?\d)*/
+
         %import common.CNAME -> NAME
 
         STRING:     "\"" /[^\"]*/ "\"" | "'" /[^']*/ "'"
+
+        list: "[" [expr ("," expr)*] "]"
 
         ?start: expr
 
@@ -298,10 +483,10 @@ class _MathEngine:
         ?expr: or_expr
 
         ?or_expr: and_expr
-            | or_expr "or" and_expr   -> or_
+            | or_expr OR_KW and_expr   -> or_
 
         ?and_expr: cmp_expr
-            | and_expr "and" cmp_expr -> and_
+            | and_expr AND_KW cmp_expr -> and_
 
         ?cmp_expr: add_expr
             | add_expr ">"  add_expr  -> gt
@@ -310,6 +495,7 @@ class _MathEngine:
             | add_expr "<=" add_expr  -> le
             | add_expr "==" add_expr  -> eq
             | add_expr "!=" add_expr  -> ne
+            | add_expr IN_KW list      -> in_
 
         ?add_expr: mul_expr
             | add_expr "+" mul_expr   -> add
@@ -317,11 +503,12 @@ class _MathEngine:
 
         ?mul_expr: unary_expr
             | mul_expr "*" unary_expr -> mul
-            | mul_expr "/" unary_expr -> div
+            | mul_expr "//" unary_expr -> floordiv
+            | mul_expr "/" unary_expr  -> div
 
         ?unary_expr: power_expr
             | "-" unary_expr          -> neg
-            | "not" unary_expr        -> not_
+            | NOT_KW unary_expr        -> not_
 
         ?power_expr: atom
             | atom "**" unary_expr    -> pow_
@@ -346,9 +533,19 @@ class _MathEngine:
             evaluate the expression tree. Defaults to the core
             :class:`_MathTransformer`.
         """
+        # Normalise numeric literals that use a leading dot (e.g. .5, .0000005)
+        # into a form accepted by the grammar (0.5, 0.0000005). The grammar
+        # requires a digit before the decimal point, but many of the
+        # dictionary-sourced expressions use the shorthand .x. Since this
+        # language has no attribute access syntax (x.y), a bare leading
+        # dot followed by digits is always a numeric literal.
+        normalised_expr = re.sub(r"(?<!\d)\.(\d)", r"0.\1", expr)
+
         try:
-            tree = self._parser.parse(expr)
+            tree = self._parser.parse(normalised_expr)
         except lark.UnexpectedInput as e:
+            # Report the original expression in the error message so that
+            # callers/logs see exactly what was provided.
             raise _MathExprError(f"Invalid math expression: {expr!r}") from e
         return _ParsedMath(tree, transformer_cls)
 

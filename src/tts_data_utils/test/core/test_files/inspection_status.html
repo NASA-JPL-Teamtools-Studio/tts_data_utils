@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Inspection Artifact Review Status</title>
+  <style>
+    body { font-family: sans-serif; max-width: 960px; margin: 40px auto; padding: 0 20px; color: #333; }
+    h1 { font-size: 1.6em; }
+    .meta { color: #888; font-size: 0.9em; margin-bottom: 24px; }
+    .summary { padding: 14px 18px; border-radius: 6px; margin-bottom: 24px; font-size: 1em; }
+    .summary.ok   { background: #d4edda; border-left: 4px solid #28a745; }
+    .summary.warn { background: #fff3cd; border-left: 4px solid #ffc107; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+    th { background: #f1f3f5; padding: 10px 12px; text-align: left; border-bottom: 2px solid #dee2e6; }
+    td { padding: 10px 12px; border-bottom: 1px solid #dee2e6; vertical-align: top; }
+    a { color: #0066cc; }
+    .badge { display: inline-block; padding: 3px 10px; border-radius: 4px; font-size: 0.85em; font-weight: bold; }
+    .badge.certified   { background: #28a745; color: white; }
+    .badge.stale       { background: #dc3545; color: white; }
+    .badge.uncertified { background: #ffc107; color: #333; }
+    .how-to { background: #f8f9fa; border-radius: 6px; padding: 18px 22px; }
+    .how-to h2 { margin-top: 0; font-size: 1.1em; }
+    .how-to ol { margin: 0; padding-left: 20px; }
+    .how-to li { margin-bottom: 6px; }
+    code { background: #e9ecef; padding: 2px 6px; border-radius: 3px; font-size: 0.92em; }
+  </style>
+</head>
+<body>
+  <h1>Inspection Artifact Review Status</h1>
+  <p class="meta">Generated: 2026-08-08T14:03 UTC &nbsp;|&nbsp;
+     0 certified &nbsp;|&nbsp;
+     0 stale &nbsp;|&nbsp;
+     3 uncertified &nbsp;|&nbsp;
+     3 total
+  </p>
+
+  <div class="summary warn">3 artifact(s) need human review. Open each linked file, verify it looks correct, then run <code>python certify.py --certify</code>.</div>
+
+  <table>
+    <thead>
+      <tr><th>Status</th><th>Artifact</th><th>Guidance</th></tr>
+    </thead>
+    <tbody>
+<tr><td><span class="badge uncertified">&#9888; UNCERTIFIED</span></td><td><a href="ampcs_eha_inspection.html" target="_blank">ampcs_eha_inspection.html</a></td><td>Never reviewed. Open, verify, then certify.</td></tr>
+<tr><td><span class="badge uncertified">&#9888; UNCERTIFIED</span></td><td><a href="ampcs_evr_inspection.html" target="_blank">ampcs_evr_inspection.html</a></td><td>Never reviewed. Open, verify, then certify.</td></tr>
+<tr><td><span class="badge uncertified">&#9888; UNCERTIFIED</span></td><td><a href="power_table_inspection.html" target="_blank">power_table_inspection.html</a></td><td>Never reviewed. Open, verify, then certify.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="how-to">
+    <h2>How to certify</h2>
+    <ol>
+      <li>Run the test suite to regenerate all HTML artifacts:<br>
+          <code>pytest src/tts_data_utils/test/core/</code></li>
+      <li>Click each UNCERTIFIED or STALE link above and verify the output in your browser.</li>
+      <li>When satisfied, stamp your approval:<br>
+          <code>python /Users/muszynsk/projects/tt_studio/dev/tts_core/tts_data_utils/src/tts_data_utils/test/certify.py</code></li>
+      <li>Commit the resulting <code>.sha256</code> files — they are the record of your review.</li>
+    </ol>
+    <p><strong>Never run <code>certify.py --certify</code> from CI or automated scripts.</strong>
+       The .sha256 files are your personal stamp. Only update them after a human has looked.</p>
+  </div>
+</body>
+</html>

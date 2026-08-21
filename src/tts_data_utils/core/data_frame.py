@@ -3,12 +3,20 @@ import pandas as pd
 import numpy as np
 import json
 from datetime import datetime
-from tts_dante.interpolators.interpolators import StepInterpolator
+from typing import Optional, Dict, List
+from tts_dante.interpolators.interpolators import StepInterpolator, LinearInterpolator
 from tts_data_utils.core.expr_engines import (
     _FilterExprError, _filter_engine,
     _MathExprError, _math_engine, _MathTransformer,
 )
 from tts_utilities.logger import create_logger
+
+try:
+    from tts_dexter.core.row_mixin import DexterRowMixin
+    DEXTER_PRESENT = True
+except ModuleNotFoundError:
+    DexterRowMixin = object
+    DEXTER_PRESENT = False
 
 logger = create_logger('tts_data_frame')
 
@@ -35,10 +43,84 @@ class _TimerProxy:
                 return result
             return _timed
         return attr
+if DEXTER_PRESENT:
+    class TtsRowSeries(DexterRowMixin, pd.Series):
+        DICT_STAMP_KEY = 'disposition'
 
+        @property
+        def dispositions(self):
+            frame = getattr(self, '_frame', None)
+            if frame is not None:
+                store = getattr(frame, '_row_dispositions', None)
+                if store is None:
+                    store = {}
+                    frame._row_dispositions = store
+                key = self.name
+                if key not in store:
+                    store[key] = []
+                return store[key]
+            if not hasattr(self, '_dispositions'):
+                self._dispositions = []
+            return self._dispositions
 
-class TtsRowSeries(pd.Series):
-    pass
+        @dispositions.setter
+        def dispositions(self, value):
+            frame = getattr(self, '_frame', None)
+            if frame is not None:
+                store = getattr(frame, '_row_dispositions', None)
+                if store is None:
+                    store = {}
+                    frame._row_dispositions = store
+                store[self.name] = list(value)
+            else:
+                self._dispositions = list(value)
+
+        def stamp(self, dispo_value):
+            frame = getattr(self, '_frame', None)
+            if frame is not None:
+                col = self.DICT_STAMP_KEY
+                if col not in frame.columns:
+                    frame[col] = None
+                frame.loc[self.name, col] = dispo_value
+            else:
+                col = self.DICT_STAMP_KEY
+                self[col] = dispo_value
+
+        @property
+        def default_html_row_style(self) -> Dict:
+            """CSS style dict applied to this row's <tr> in a PowerTable.
+
+            Override in subclasses to drive conditional row coloring.
+            """
+            return {}
+
+        @property
+        def default_html_cell_styles(self) -> 'Dict[str, Dict]':
+            """Per-column CSS style mapping for cells in a PowerTable.
+
+            Return a dict of ``{column_name: css_dict}`` to style individual
+            cells. Override in subclasses to drive conditional cell formatting.
+            """
+            return {}
+else:
+    class TtsRowSeries(pd.Series):
+        @property
+        def default_html_row_style(self) -> Dict:
+            """CSS style dict applied to this row's <tr> in a PowerTable.
+
+            Override in subclasses to drive conditional row coloring.
+            """
+            return {}
+
+        @property
+        def default_html_cell_styles(self) -> 'Dict[str, Dict]':
+            """Per-column CSS style mapping for cells in a PowerTable.
+
+            Return a dict of ``{column_name: css_dict}`` to style individual
+            cells. Override in subclasses to drive conditional cell formatting.
+            """
+            return {}
+
 
 class TtsColumnSeries(pd.Series):
     pass
@@ -61,9 +143,9 @@ def _is_scalar_selector(key):
 
 class _SeriesWrappingIndexer:
     """Wraps a pandas loc/iloc indexer to return typed Row/Column Series."""
-
-    def __init__(self, indexer, row_cls, col_cls):
+    def __init__(self, indexer, frame, row_cls, col_cls):
         self._indexer = indexer
+        self._frame = frame
         self._row_cls = row_cls
         self._col_cls = col_cls
 
@@ -73,6 +155,8 @@ class _SeriesWrappingIndexer:
                 result.__class__ = self._col_cls
             else:
                 result.__class__ = self._row_cls
+                if hasattr(result, '__dict__'):
+                    result._frame = self._frame
         return result
 
     def __getitem__(self, key):
@@ -83,6 +167,14 @@ class _SeriesWrappingIndexer:
 
     def __getattr__(self, name):
         return getattr(self._indexer, name)
+
+    def __call__(self, *args, **kwargs):
+        return _SeriesWrappingIndexer(
+            self._indexer(*args, **kwargs),
+            self._frame,
+            self._row_cls,
+            self._col_cls,
+        )
 
 
 class TtsDataFrame(pd.DataFrame):
@@ -95,7 +187,7 @@ class TtsDataFrame(pd.DataFrame):
 
     # Attributes in this list are copied by pandas when creating new
     # objects via methods like .copy(), .loc, .sort_values(), etc.
-    _metadata = ["name", "metadata", "_subcontainers"]
+    _metadata = ["name", "metadata", "_subcontainers", "_row_dispositions"]
 
     # Optional associated row class for ergonomic row views (not used for typing).
     ROW_ITEM_CLS = None
@@ -107,17 +199,17 @@ class TtsDataFrame(pd.DataFrame):
     TIME_FORMATS = {}
 
     # Default column used for time-based operations; subclasses should override.
-    DEFAULT_TIME_LABEL = None
+    DEFAULT_TIME_LABEL = 'scet'
 
     ROW_SERIES_CLASS = TtsRowSeries
 
     COLUMN_SERIES_CLASS = TtsColumnSeries
 
-    LABEL_COL = None
+    LABEL_COL = 'name'
 
-    VALUE_COL = None
+    VALUE_COL = 'value'
 
-    LABEL_COLUMN = None
+    LABEL_COLUMN = 'name'
 
     SUBCONTAINER_KEY = None
 
@@ -162,6 +254,7 @@ class TtsDataFrame(pd.DataFrame):
         self._data_hash = None
         self._pivot_cache = None
         self._subcontainers = {}
+        self._row_dispositions = {}
 
         if coerce or validate:
             self._apply_schema(coerce=coerce, validate=validate)
@@ -258,6 +351,107 @@ class TtsDataFrame(pd.DataFrame):
 
         # Preserve subclass type via _constructor
         return self._constructor(smoothed).__finalize__(self)
+
+    def time_average(self, freq, label_value=None, time_col=None, label_col=None, value_col=None):
+        """Return a time-based average over fixed-width time bins.
+
+        This operates on long-form telemetry where labels and values are
+        carried in configured columns, and timestamps are in
+        :attr:`DEFAULT_TIME_LABEL`.  Samples are grouped into
+        non-overlapping time bins of width ``freq`` (a pandas
+        offset string such as ``'98min'``), and each bin is replaced by a
+        single row whose value is the arithmetic mean of the samples in
+        that bin.
+
+        When a label column is present, bins are formed separately for
+        each label value.
+
+        Parameters
+        ----------
+        freq : str or DateOffset
+            Resampling frequency understood by :meth:`pandas.Series.resample`,
+            e.g. ``'98min'``.
+        label_value : any or None, optional
+            When provided, restrict averaging to rows where ``label_col``
+            equals this value.
+        time_col : str or None, optional
+            Column to use as the time axis; defaults to
+            :attr:`DEFAULT_TIME_LABEL` when None.
+        label_col : str or None, optional
+            Column holding label names; defaults to :attr:`LABEL_COL`.
+        value_col : str or None, optional
+            Column holding numeric values; defaults to :attr:`VALUE_COL`.
+
+        Returns
+        -------
+        TtsDataFrame
+            New frame of the same subclass containing one row per time
+            bin, with ``value_col`` replaced by the bin-mean values. The
+            time column for each bin is taken from the bin's resample
+            index (typically the left edge of the interval).
+        """
+
+        time_col = time_col or self.DEFAULT_TIME_LABEL
+        label_col = label_col or self.LABEL_COL
+        value_col = value_col or self.VALUE_COL
+
+        if time_col is None or value_col is None:
+            raise ValueError(
+                "time_average requires DEFAULT_TIME_LABEL and VALUE_COL to be configured "
+                "or passed explicitly."
+            )
+
+        if time_col not in self.columns or value_col not in self.columns:
+            raise ValueError(
+                f"time_average requires time and value columns present on the frame; "
+                f"missing {time_col!r} or {value_col!r}."
+            )
+
+        df = self.copy()
+
+        # Optional label filtering
+        if label_value is not None:
+            if label_col is None or label_col not in df.columns:
+                raise ValueError(
+                    "label_value was provided but LABEL_COL/label_col is not configured "
+                    "or not present in the frame."
+                )
+            df = df[df[label_col].eq(label_value)].copy()
+
+        # Ensure datetime time column and stable ordering for resampling
+        df[time_col] = pd.to_datetime(df[time_col])
+
+        def _resample_group(group):
+            # Work on a copy with a datetime index for resampling.
+            g = group.copy()
+            g[time_col] = pd.to_datetime(g[time_col])
+            g = g.set_index(time_col).sort_index()
+
+            # Resample the value column to compute mean per bin.
+            agg = g[value_col].resample(freq).mean()
+
+            # Drop bins with no data (NaN means no contributing samples).
+            mask = ~agg.isna()
+            if not mask.any():
+                return g.iloc[0:0]
+
+            agg = agg[mask]
+
+            # Take representative metadata from the first row in each bin.
+            first = g.resample(freq).first()
+            first = first.loc[agg.index]
+
+            # Overwrite value column with the bin means and restore time column.
+            first[value_col] = agg.values
+            first = first.reset_index()
+            return first
+
+        if label_col is not None and label_col in df.columns:
+            reduced = df.groupby(label_col, group_keys=False).apply(_resample_group)
+        else:
+            reduced = _resample_group(df)
+
+        return self._constructor(reduced).__finalize__(self)
 
     def block_average(self, block_size, label_value=None, time_col=None, label_col=None, value_col=None):
         """Return a simple block (bin) average over non-overlapping blocks.
@@ -367,6 +561,61 @@ class TtsDataFrame(pd.DataFrame):
         """
         return pd.read_csv(filepath, *args, **kwargs)
 
+    def to_csv(self, *args, **kwargs):  # pragma: no cover - thin wrapper around pandas
+        """Write object to a CSV file, formatting time columns via ``TIME_FORMATS``.
+
+        This behaves like :meth:`pandas.DataFrame.to_csv`, but for any columns
+        listed in :attr:`TIME_FORMATS` that are datetime-like, values are first
+        converted to strings using the configured strftime format. When a column
+        has multiple formats configured (list/tuple), the first entry is used
+        for export.
+        """
+
+        time_formats = getattr(self, "TIME_FORMATS", None) or {}
+        if not time_formats:
+            # No configured time formats: fall back to the base implementation.
+            return pd.DataFrame.to_csv(self, *args, **kwargs)
+
+        df = self.copy()
+
+        for col, fmt_spec in time_formats.items():
+            if col not in df.columns:
+                continue
+            if fmt_spec == "TBD" or fmt_spec is None:
+                continue
+
+            # When multiple formats are configured, use the first one for export.
+            if isinstance(fmt_spec, (list, tuple)):
+                if not fmt_spec:
+                    continue
+                fmt = fmt_spec[0]
+            else:
+                fmt = fmt_spec
+
+            if not isinstance(fmt, str):
+                continue
+
+            series = df[col]
+
+            # If the column is already datetime-like, format directly.
+            if pd.api.types.is_datetime64_any_dtype(series) or pd.api.types.is_datetime64tz_dtype(series):
+                df[col] = series.dt.strftime(fmt)
+                continue
+
+            # For object columns, try to coerce to datetime first and only
+            # format entries that successfully convert.
+            if series.dtype == "object":
+                dt_series = pd.to_datetime(series, errors="coerce")
+                if dt_series.notna().any():
+                    formatted = dt_series.dt.strftime(fmt)
+                    mask = dt_series.notna()
+                    new_series = series.astype(object)
+                    new_series[mask] = formatted[mask]
+                    df[col] = new_series
+
+        # Delegate to pandas using the formatted copy.
+        return pd.DataFrame.to_csv(df, *args, **kwargs)
+
     @property
     def _constructor(self):  # pragma: no cover - exercised indirectly
         cls = type(self)
@@ -383,6 +632,16 @@ class TtsDataFrame(pd.DataFrame):
             object.__setattr__(self, '_subcontainers', {})
         else:
             object.__setattr__(self, '_subcontainers', dict(self._subcontainers))
+        dispo_store = getattr(self, '_row_dispositions', None)
+        if dispo_store is None:
+            object.__setattr__(self, '_row_dispositions', {})
+        else:
+            live_keys = set(self.index)
+            object.__setattr__(
+                self,
+                '_row_dispositions',
+                {k: list(v) for k, v in dispo_store.items() if k in live_keys},
+            )
         key_cfg = self.SUBCONTAINER_KEY
         if self._subcontainers and key_cfg is not None:
             before = len(self._subcontainers)
@@ -446,6 +705,12 @@ class TtsDataFrame(pd.DataFrame):
             self._subcontainers[row_key] = {}
         self._subcontainers[row_key][name] = container
 
+    def get_row_dispositions(self, row_key=None):
+        store = getattr(self, '_row_dispositions', None) or {}
+        if row_key is None:
+            return store
+        return store.get(row_key, [])
+
     def __getitem__(self, key):
         result = super().__getitem__(key)
         if isinstance(result, pd.Series):
@@ -455,22 +720,31 @@ class TtsDataFrame(pd.DataFrame):
 
     @property
     def loc(self):
-        return _SeriesWrappingIndexer(super().loc, self.ROW_SERIES_CLASS, self.COLUMN_SERIES_CLASS)
+        return _SeriesWrappingIndexer(super().loc, self, self.ROW_SERIES_CLASS, self.COLUMN_SERIES_CLASS)
 
     @property
     def iloc(self):
-        return _SeriesWrappingIndexer(super().iloc, self.ROW_SERIES_CLASS, self.COLUMN_SERIES_CLASS)
+        return _SeriesWrappingIndexer(super().iloc, self, self.ROW_SERIES_CLASS, self.COLUMN_SERIES_CLASS)
 
     def xs(self, key, axis=0, level=None, drop_level=True):
         result = super().xs(key, axis=axis, level=level, drop_level=drop_level)
         if isinstance(result, pd.Series):
             result.__class__ = self.ROW_SERIES_CLASS if axis in (0, 'index') else self.COLUMN_SERIES_CLASS
+            if axis in (0, 'index') and hasattr(result, '__dict__'):
+                result._frame = self
         return result
 
     def iterrows(self):
         for idx, row in super().iterrows():
             row.__class__ = self.ROW_SERIES_CLASS
+            if hasattr(row, '__dict__'):
+                row._frame = self
             yield idx, row
+
+    def stamp_all(self, dispo_choice, dispo_format):
+        """Apply dispositions to every row, mirroring DataContainer.stamp_all."""
+        for _, row in self.iterrows():
+            row.choose_and_stamp(dispo_choice, dispo_format)
 
     def select_wide(
         self,
@@ -606,6 +880,144 @@ class TtsDataFrame(pd.DataFrame):
         hi = np.searchsorted(qt_arr, row_times + tol_td, side='right')
         return self[lo < hi]
 
+    def contiguous_runs(
+        self,
+        labels,
+        *,
+        tolerance=None,
+        min_repeats: int = 1,
+        target_value=None,
+        label_col: Optional[str] = None,
+        value_col: Optional[str] = None,
+        index_col: Optional[str] = None,
+    ) -> Dict[str, List['TtsDataFrame']]:
+        """Return contiguous runs of constant values for one or more labels.
+
+        For each label name in ``labels``, this method scans the long-form
+        telemetry in time order and identifies maximal contiguous runs where
+        the label's ``value_col`` is constant across successive samples. Each
+        qualifying run (after filtering) is converted into a new
+        :class:`TtsDataFrame` that includes *all* labels present in the
+        original frame over the corresponding time window, using
+        :meth:`at_times_where` to honor the ``tolerance`` parameter.
+
+        Parameters
+        ----------
+        labels : str or iterable of str
+            Label name or collection of label names to analyze.
+        tolerance : number or pd.Timedelta or None, optional
+            Passed through to :meth:`at_times_where` to include rows within
+            this time window of qualifying timestamps. A plain number is
+            interpreted as seconds.
+        min_repeats : int, default 1
+            Minimum number of consecutive samples with the same value
+            required for a run to be kept. Shorter runs are discarded.
+        target_value : any or None, optional
+            When provided, only runs where the label's value equals
+            ``target_value`` are kept. Runs with other values are discarded.
+        label_col, value_col, index_col : str or None, optional
+            Column overrides; fall back to class attributes.
+
+        Returns
+        -------
+        dict[str, list[TtsDataFrame]]
+            Mapping from each label name to a list of run-specific frames.
+        """
+        label_col = label_col or self.LABEL_COL
+        value_col = value_col or self.VALUE_COL
+        index_col = index_col or self.DEFAULT_TIME_LABEL
+
+        if label_col is None:
+            raise ValueError("label_col must be provided or set as LABEL_COL on the class.")
+        if value_col is None:
+            raise ValueError("value_col must be provided or set as VALUE_COL on the class.")
+        if index_col is None:
+            raise ValueError("index_col must be provided or set as DEFAULT_TIME_LABEL on the class.")
+        if min_repeats <= 0:
+            raise ValueError("min_repeats must be a positive integer")
+
+        # Normalize labels argument to a list of names
+        if isinstance(labels, str):
+            label_names = [labels]
+        else:
+            label_names = list(labels)
+
+        result: dict[str, list['TtsDataFrame']] = {}
+
+        for lbl in label_names:
+            # Extract time-ordered series for this label
+            label_df = self[self[label_col] == lbl].copy()
+            if label_df.empty:
+                result[lbl] = []
+                continue
+
+            label_df = label_df.sort_values(index_col)
+            vals = label_df[value_col].values
+
+            # Identify contiguous runs of constant values
+            runs: list[tuple[int, int, object]] = []
+            start_idx = 0
+            current_value = vals[0]
+
+            for i in range(1, len(label_df)):
+                v = vals[i]
+                if v == current_value:
+                    continue
+                # End of current run at i-1
+                runs.append((start_idx, i - 1, current_value))
+                start_idx = i
+                current_value = v
+
+            # Final run
+            runs.append((start_idx, len(label_df) - 1, current_value))
+
+            # Filter runs by length and optional target_value
+            filtered_runs: list[tuple[int, int, object]] = []
+            for start, end, run_value in runs:
+                length = end - start + 1
+                if length < min_repeats:
+                    continue
+                if target_value is not None and run_value != target_value:
+                    continue
+                filtered_runs.append((start, end, run_value))
+
+            run_frames: list['TtsDataFrame'] = []
+
+            for start, end, run_value in filtered_runs:
+                t_start = label_df.iloc[start][index_col]
+                t_end = label_df.iloc[end][index_col]
+
+                # Restrict to the time window for this run
+                time_mask = (self[index_col] >= t_start) & (self[index_col] <= t_end)
+                window = self[time_mask].copy()
+                if window.empty:
+                    continue
+
+                # Build a filter expression matching this label/value.  Booleans
+                # are rendered as 0/1 so that they are parsed as numeric
+                # literals by the filter engine rather than as label names.
+                if isinstance(run_value, str):
+                    expr_value = repr(run_value)
+                elif isinstance(run_value, bool):
+                    expr_value = "1" if run_value else "0"
+                else:
+                    expr_value = str(run_value)
+                expr = f"{lbl} == {expr_value}"
+
+                run_df = window.at_times_where(
+                    expr,
+                    tolerance=tolerance,
+                    label_col=label_col,
+                    value_col=value_col,
+                    index_col=index_col,
+                )
+                if not run_df.empty:
+                    run_frames.append(run_df)
+
+            result[lbl] = run_frames
+
+        return result
+
     @property
     def wide(self):
         index   = self.DEFAULT_TIME_LABEL
@@ -656,6 +1068,30 @@ class TtsDataFrame(pd.DataFrame):
             Rows where the expression evaluates to True.
         """
         return self[_filter_engine.parse(expr).eval(self)]
+
+    def inspect_expr_language(self):
+        math_engine = self.MATH_ENGINE
+        math_transformer = self.MATH_TRANSFORMER
+        funcs = getattr(math_transformer, "_FUNCS", {})
+        math_functions = sorted(funcs.keys()) if isinstance(funcs, dict) else []
+        filter_engine = _filter_engine
+        info = {
+            "math_engine": type(math_engine),
+            "math_transformer": math_transformer,
+            "math_functions": math_functions,
+            "math_keywords": {
+                "boolean": {"and", "or", "not"},
+                "comparison": {">", ">=", "<", "<=", "==", "!=", "in"},
+            },
+            "filter_engine": type(filter_engine),
+            "filter_keywords": {
+                "boolean": {"and", "or", "not"},
+                "comparison": {">", ">=", "<", "<=", "==", "!=", "is", "is not", "in", "not in"},
+                "literals": {"None", "null", "none", "True", "true", "False", "false"},
+            },
+        }
+        return info
+
 
     def get_interpolator(self, label: str):
         """Return the interpolator to use for ``label`` in :meth:`derive_values`.
@@ -755,6 +1191,16 @@ class TtsDataFrame(pd.DataFrame):
         derived_name, rhs = expr.split('=', 1)
         derived_name = derived_name.strip()
 
+        # Support multiple target names on the left-hand side, e.g.:
+        #   "M_val, T_val, RTS_val = fmt_match(message, 'M=%d; T=%d; RTS=%d')"
+        # In this case, the RHS must evaluate to an iterable of the same
+        # length as the number of target names.
+        derived_names = [n.strip() for n in derived_name.split(',') if n.strip()]
+        if not derived_names:
+            raise ValueError(
+                f"derive_values expr must have at least one target name before '=', got {expr!r}")
+        multi_output = len(derived_names) > 1
+
         # Parse using the shared math engine and this class's transformer.
         parsed = self.MATH_ENGINE.parse(rhs.strip(), transformer_cls=self.MATH_TRANSFORMER)
 
@@ -786,7 +1232,26 @@ class TtsDataFrame(pd.DataFrame):
             for t in common_times:
                 slot = {lbl: lookup[lbl][t] for lbl in parsed.labels}
                 result = parsed.eval(slot)
-                rows.append({index_col: t, label_col: derived_name, value_col: result})
+
+                if multi_output:
+                    try:
+                        values = list(result)
+                    except TypeError as exc:
+                        raise _MathExprError(
+                            "derive_values: multi-target assignment requires the "
+                            "expression to return an iterable of values."
+                        ) from exc
+
+                    if len(values) != len(derived_names):
+                        raise _MathExprError(
+                            f"derive_values: expression returned {len(values)} values "
+                            f"but {len(derived_names)} target names were given."
+                        )
+
+                    for name, val in zip(derived_names, values):
+                        rows.append({index_col: t, label_col: name, value_col: val})
+                else:
+                    rows.append({index_col: t, label_col: derived_names[0], value_col: result})
         else:
             all_times = sorted({t for times, _ in label_data.values() for t in times})
             for t in all_times:
@@ -801,7 +1266,26 @@ class TtsDataFrame(pd.DataFrame):
                 if not valid:
                     continue
                 result = parsed.eval(slot)
-                rows.append({index_col: t, label_col: derived_name, value_col: result})
+
+                if multi_output:
+                    try:
+                        values = list(result)
+                    except TypeError as exc:
+                        raise _MathExprError(
+                            "derive_values: multi-target assignment requires the "
+                            "expression to return an iterable of values."
+                        ) from exc
+
+                    if len(values) != len(derived_names):
+                        raise _MathExprError(
+                            f"derive_values: expression returned {len(values)} values "
+                            f"but {len(derived_names)} target names were given."
+                        )
+
+                    for name, val in zip(derived_names, values):
+                        rows.append({index_col: t, label_col: name, value_col: val})
+                else:
+                    rows.append({index_col: t, label_col: derived_names[0], value_col: result})
 
         if not rows:
             if append:
@@ -816,6 +1300,156 @@ class TtsDataFrame(pd.DataFrame):
                               coerce=False, validate=False)
 
         return derived_df
+
+    def find_crossings(
+        self,
+        label,
+        target=0.0,
+        *,
+        interpolator=None,
+        timeout=None,
+        time_col=None,
+        label_col=None,
+        value_col=None,
+    ):
+        """Find times where a label crosses a given value using interpolation.
+
+        This is useful for detecting zero-crossings (e.g. latitude == 0) and
+        determining direction (negative-to-positive vs positive-to-negative).
+
+        Parameters
+        ----------
+        label : str
+            Label name to analyze.
+        target : float, default 0.0
+            Target value to detect crossings of (e.g. 0 for zero-crossings).
+        interpolator : Interpolator or None, optional
+            ``tts_dante`` interpolator instance to use for refining the
+            crossing time. When None, a :class:`LinearInterpolator` is used.
+        timeout : float or None, optional
+            Max distance (in time units of ``time_col``) passed to the
+            interpolator. See interpolator docs for semantics.
+        time_col, label_col, value_col : str or None, optional
+            Column overrides; fall back to class attributes.
+
+        Returns
+        -------
+        TtsDataFrame
+            Frame with one row per crossing, columns:
+
+            - time: estimated crossing time
+            - direction: +1 for negative->positive crossings,
+              -1 for positive->negative crossings
+            - label: the label name
+            - target: the target value crossed
+        """
+        time_col = time_col or self.DEFAULT_TIME_LABEL
+        label_col = label_col or self.LABEL_COL
+        value_col = value_col or self.VALUE_COL
+
+        if time_col is None or label_col is None or value_col is None:
+            raise ValueError(
+                "find_crossings requires DEFAULT_TIME_LABEL, LABEL_COL, and VALUE_COL "
+                "to be configured or passed explicitly."
+            )
+
+        df = self[self[label_col] == label].copy()
+        if df.empty:
+            empty = pd.DataFrame(columns=["time", "direction", "label", "target"])
+            return self._constructor(empty).__finalize__(self)
+
+        # Ensure sorted by time and convert to a numeric axis that matches the
+        # interpolator's expectation. For datetime, use seconds since epoch.
+        df = df.sort_values(time_col)
+        col = df[time_col]
+        if np.issubdtype(col.dtype, np.datetime64):
+            times_raw = pd.to_datetime(col)
+            epoch = np.datetime64("1970-01-01T00:00:00Z")
+            times = (times_raw.values - epoch) / np.timedelta64(1, "s")
+        else:
+            times_raw = col
+            times = col.astype(float).values
+
+        values = df[value_col].astype(float).values
+
+        if len(times) < 2:
+            empty = pd.DataFrame(columns=["time", "direction", "label", "target"])
+            return self._constructor(empty).__finalize__(self)
+
+        interp = interpolator if interpolator is not None else LinearInterpolator()
+
+        crossings = []
+
+        # Helper to map numeric seconds back to time_col dtype
+        def _to_time_axis(t_numeric):
+            if np.issubdtype(times_raw.dtype, np.datetime64):
+                return (epoch + np.timedelta64(int(t_numeric * 1e9), "ns")).astype(times_raw.dtype)
+            else:
+                return t_numeric
+
+        # Scan adjacent samples for sign changes around target
+        offsets = values - target
+        for i in range(len(times) - 1):
+            a, b = offsets[i], offsets[i + 1]
+            if np.isnan(a) or np.isnan(b):
+                continue
+
+            # Check if the segment [i, i+1] contains a crossing
+            if a == 0:
+                t_cross = times[i]
+            elif b == 0:
+                t_cross = times[i + 1]
+            elif a * b > 0:
+                # Same sign, no crossing
+                continue
+            else:
+                # Signs differ: refine crossing time within [times[i], times[i+1]]
+                t_lo, t_hi = times[i], times[i + 1]
+                v_lo, v_hi = values[i], values[i + 1]
+
+                # Simple bisection using the interpolator to locate where
+                # interpolated value == target.
+                for _ in range(32):  # sufficient for typical float precision
+                    t_mid = 0.5 * (t_lo + t_hi)
+                    v_mid = interp.interpolate(t_mid, [t_lo, t_hi], [v_lo, v_hi], timeout)
+                    if v_mid is None:
+                        break
+                    if (v_lo - target) * (v_mid - target) <= 0:
+                        t_hi, v_hi = t_mid, v_mid
+                    else:
+                        t_lo, v_lo = t_mid, v_mid
+                else:
+                    t_cross = 0.5 * (t_lo + t_hi)
+                    # Determine direction based on refined endpoints
+                    a, b = v_lo - target, v_hi - target
+                    direction = 1 if a < 0 and b > 0 else -1 if a > 0 and b < 0 else 0
+                    crossings.append({
+                        "time": _to_time_axis(t_cross),
+                        "direction": direction,
+                        "label": label,
+                        "target": target,
+                    })
+                    continue
+
+                # Fallback: use mid-point without bisection success
+                t_cross = 0.5 * (times[i] + times[i + 1])
+
+            # If we got here via exact endpoint or fallback, infer direction
+            direction = 0
+            if a < 0 and b > 0:
+                direction = 1
+            elif a > 0 and b < 0:
+                direction = -1
+
+            crossings.append({
+                "time": _to_time_axis(t_cross),
+                "direction": direction,
+                "label": label,
+                "target": target,
+            })
+
+        cross_df = pd.DataFrame(crossings)
+        return self._constructor(cross_df).__finalize__(self)
 
     def _apply_schema(self, coerce: bool, validate: bool) -> None:
         
@@ -847,9 +1481,49 @@ class TtsDataFrame(pd.DataFrame):
 
             # Time-like columns: use pandas to_datetime with declared format
             if col in time_formats and time_formats[col] != "TBD":
-                fmt = time_formats[col]
-                self[col] = pd.to_datetime(series, format=fmt, errors="raise")
-                continue
+                fmt_spec = time_formats[col]
+
+                # Single explicit format string: preserve strict behaviour and
+                # raise on invalid parses.
+                if isinstance(fmt_spec, str):
+                    self[col] = pd.to_datetime(series, format=fmt_spec, errors="raise")
+                    continue
+
+                # Multiple formats: attempt each in order, allowing a mixture of
+                # datetime objects and differently-formatted strings. This is
+                # useful for missions where a given column (e.g. SCET) may
+                # appear in more than one textual representation.
+                if isinstance(fmt_spec, (list, tuple)):
+
+                    def _is_datetime_like(v):
+                        return isinstance(v, (datetime, pd.Timestamp, np.datetime64))
+
+                    if pd.api.types.is_object_dtype(series):
+                        is_dt = series.apply(_is_datetime_like)
+                    else:
+                        # Non-object dtypes are unlikely to be mixed, but treat
+                        # them as non-datetime to be safe.
+                        is_dt = pd.Series(False, index=series.index)
+
+                    # Start by preserving any existing datetime-like values
+                    result = pd.to_datetime(series.where(is_dt, None), errors="coerce")
+
+                    for fmt in fmt_spec:
+                        remaining = result.isna()
+                        if not remaining.any():
+                            break
+                        to_parse = series[remaining]
+                        parsed = pd.to_datetime(to_parse, format=fmt, errors="coerce")
+                        result.loc[remaining] = parsed
+
+                    # Only overwrite the column if we successfully parsed at
+                    # least one value; otherwise leave as-is so callers can
+                    # handle unexpected formats themselves.
+                    if result.notna().any():
+                        self[col] = result
+                    continue
+
+                # Unknown fmt_spec type: fall through and treat as a normal column
 
             # Non-time columns: attempt simple casting based on primary type
             allowed = types if isinstance(types, tuple) else (types,)
@@ -966,6 +1640,84 @@ class TtsDataFrame(pd.DataFrame):
                 raise ValueError(f'Expected at most {maximum} rows, got {n}.')
         return result
 
+    def _get_column_for_filter(self, column):
+        # Exact column name wins.
+        if column in self.columns:
+            return self[column]
+
+        def _parse_bracket_path(spec):
+            s = spec
+            n = len(s)
+            if n == 0:
+                return None
+            # Parse leading NAME (Python identifier style)
+            i = 0
+            if not (s[0].isalpha() or s[0] == "_"):
+                return None
+            i += 1
+            while i < n and (s[i].isalnum() or s[i] == "_"):
+                i += 1
+            base = s[:i]
+            keys = []
+            while i < n:
+                if s[i] != "[":
+                    return None
+                i += 1
+                if i >= n or s[i] not in ("'", '"'):
+                    return None
+                quote = s[i]
+                i += 1
+                start = i
+                while i < n and s[i] != quote:
+                    i += 1
+                if i >= n:
+                    return None
+                key = s[start:i]
+                keys.append(key)
+                i += 1  # skip closing quote
+                if i >= n or s[i] != "]":
+                    return None
+                i += 1  # skip closing bracket
+            if i != n:
+                return None
+            return base, keys
+
+        # Bracket syntax: arguments['rts_no']['inner'] ...
+        parsed = _parse_bracket_path(column)
+        if parsed is not None:
+            base, keys = parsed
+            if base in self.columns:
+                series = self[base]
+
+                def _extract(value):
+                    v = value
+                    for key in keys:
+                        if not isinstance(v, dict):
+                            return np.nan
+                        v = v.get(key, np.nan)
+                    return v
+
+                return series.map(_extract)
+
+        # Fallback: dotted dict access (for backwards compatibility).
+        if "." in column:
+            base, *keys = column.split(".")
+            if base in self.columns:
+                series = self[base]
+
+                def _extract(value):
+                    v = value
+                    for key in keys:
+                        if not isinstance(v, dict):
+                            return np.nan
+                        v = v.get(key, np.nan)
+                    return v
+
+                return series.map(_extract)
+
+        # Default behavior: treat as a normal column (will raise if missing).
+        return self[column]
+
     def eq(self, column, value, minimum=None, maximum=None, exactly=None, tolerance=0):
         """Return rows where ``column == value``.
 
@@ -979,58 +1731,109 @@ class TtsDataFrame(pd.DataFrame):
         minimum, maximum, exactly : int or None
             Raise ``ValueError`` if result count violates constraint.
         """
-        if tolerance and isinstance(value, (int, float)):
-            result = self[(self[column] - value).abs() <= tolerance]
+        col = self._get_column_for_filter(column)
+
+        # Treat comparisons to None as null checks for convenience.
+        if value is None:
+            result = self[col.isna()]
+        elif tolerance and isinstance(value, (int, float)):
+            result = self[(col - value).abs() <= tolerance]
         else:
-            result = self[self[column] == value]
+            result = self[col == value]
+
         return self._filter(result, minimum, maximum, exactly)
 
     def ne(self, column, value, minimum=None, maximum=None, exactly=None):
-        """Return rows where ``column != value``."""
-        return self._filter(self[self[column] != value], minimum, maximum, exactly)
+        """Return rows where ``column != value``.
+
+        When ``value`` is ``None``, this behaves as a non-null check
+        (rows where ``column`` is not null).
+        """
+        col = self._get_column_for_filter(column)
+
+        if value is None:
+            result = self[col.notna()]
+        else:
+            result = self[col != value]
+
+        return self._filter(result, minimum, maximum, exactly)
 
     def gt(self, column, value, minimum=None, maximum=None, exactly=None):
         """Return rows where ``column > value``."""
-        return self._filter(self[self[column] > value], minimum, maximum, exactly)
+        col = self._get_column_for_filter(column)
+        return self._filter(self[col > value], minimum, maximum, exactly)
 
     def lt(self, column, value, minimum=None, maximum=None, exactly=None):
         """Return rows where ``column < value``."""
-        return self._filter(self[self[column] < value], minimum, maximum, exactly)
+        col = self._get_column_for_filter(column)
+        return self._filter(self[col < value], minimum, maximum, exactly)
 
     def gte(self, column, value, minimum=None, maximum=None, exactly=None):
         """Return rows where ``column >= value``."""
-        return self._filter(self[self[column] >= value], minimum, maximum, exactly)
+        col = self._get_column_for_filter(column)
+        return self._filter(self[col >= value], minimum, maximum, exactly)
 
     def lte(self, column, value, minimum=None, maximum=None, exactly=None):
         """Return rows where ``column <= value``."""
-        return self._filter(self[self[column] <= value], minimum, maximum, exactly)
+        col = self._get_column_for_filter(column)
+        return self._filter(self[col <= value], minimum, maximum, exactly)
 
     def isin(self, column, values, minimum=None, maximum=None, exactly=None):
         """Return rows where ``column`` value is in ``values``."""
-        return self._filter(self[self[column].isin(values)], minimum, maximum, exactly)
+        col = self._get_column_for_filter(column)
+        return self._filter(self[col.isin(values)], minimum, maximum, exactly)
 
     def notin(self, column, values, minimum=None, maximum=None, exactly=None):
         """Return rows where ``column`` value is not in ``values``."""
-        return self._filter(self[~self[column].isin(values)], minimum, maximum, exactly)
+        col = self._get_column_for_filter(column)
+        return self._filter(self[~col.isin(values)], minimum, maximum, exactly)
+
+    def dict_key_eq(self, column, key, value, minimum=None, maximum=None, exactly=None):
+        """Return rows where a dict-valued ``column`` has ``key == value``.
+
+        This is intended for columns that store dictionaries, such as the
+        ``arguments`` column on EVR frames produced by ``extract_arguments``.
+        Rows where the cell is not a dict or does not contain ``key`` are
+        treated as non-matching and are not included in the result.
+        """
+        col = self[column]
+
+        sentinel = object()
+
+        def _matches(d):
+            if not isinstance(d, dict):
+                return False
+            v = d.get(key, sentinel)
+            if v is sentinel:
+                return False
+            return v == value
+
+        mask = col.map(_matches)
+        result = self[mask]
+        return self._filter(result, minimum, maximum, exactly)
 
     def contains(self, column, substring, case_sensitive=True, minimum=None, maximum=None, exactly=None):
         """Return rows where string ``column`` contains ``substring``."""
-        mask = self[column].str.contains(substring, case=case_sensitive, na=False)
+        col = self._get_column_for_filter(column)
+        mask = col.str.contains(substring, case=case_sensitive, na=False)
         return self._filter(self[mask], minimum, maximum, exactly)
 
     def doesnotcontain(self, column, substring, case_sensitive=True, minimum=None, maximum=None, exactly=None):
         """Return rows where string ``column`` does not contain ``substring``."""
-        mask = self[column].str.contains(substring, case=case_sensitive, na=False)
+        col = self._get_column_for_filter(column)
+        mask = col.str.contains(substring, case=case_sensitive, na=False)
         return self._filter(self[~mask], minimum, maximum, exactly)
 
     def between(self, column, lower, upper, inclusive='both', minimum=None, maximum=None, exactly=None):
         """Return rows where ``lower <= column <= upper`` (configurable via ``inclusive``)."""
-        result = self[self[column].between(lower, upper, inclusive=inclusive)]
+        col = self._get_column_for_filter(column)
+        result = self[col.between(lower, upper, inclusive=inclusive)]
         return self._filter(result, minimum, maximum, exactly)
 
     def matches(self, column, pattern, minimum=None, maximum=None, exactly=None):
         """Return rows where string ``column`` matches regex ``pattern``."""
-        mask = self[column].str.match(pattern, na=False)
+        col = self._get_column_for_filter(column)
+        mask = col.str.match(pattern, na=False)
         return self._filter(self[mask], minimum, maximum, exactly)
 
     def before(self, time, time_label=None, inclusive=False, minimum=None, maximum=None, exactly=None):
@@ -1064,25 +1867,204 @@ class TtsDataFrame(pd.DataFrame):
             raise ValueError("time_label must be provided or set as DEFAULT_TIME_LABEL on the class.")
         result = self[self[col] >= time] if inclusive else self[self[col] > time]
         return self._filter(result, minimum, maximum, exactly)
-    
-    @property
-    def lad(self):
-        """Return a LAD-style view: one row per label, last in time.
 
-        For each distinct value in ``LABEL_COL`` (``'name'``), this
-        selects the row whose ``DEFAULT_TIME_LABEL`` (``'scet'``) is
-        maximal and returns a new :class:`Oco2ChannelFrame` containing
-        just those rows.
+    def lad(self, value=None, *, label_col=None, time_col=None):
+        """LAD-style helper.
+
+        When ``value`` is None (default), return a LAD-style view: one
+        row per label, last in time — identical to the previous
+        :pyattr:`lad` property.
+
+        When ``value`` is not None, treat it as a label value and return
+        the latest row for that label using ``label_col`` (default
+        :attr:`LABEL_COL`) and ``time_col`` (default
+        :attr:`DEFAULT_TIME_LABEL`).
         """
-        label_col = self.LABEL_COL
-        time_col = self.DEFAULT_TIME_LABEL
+        label_col = label_col or self.LABEL_COL
+        time_col = time_col or self.DEFAULT_TIME_LABEL
 
-        if label_col not in self.columns or time_col not in self.columns:
-            return self.__class__(self.copy(), coerce=False, validate=False)
+        if label_col is None:
+            raise ValueError("LABEL_COL/label_col must be configured to use lad().")
 
-        # idx of max time per label
-        idx = self.groupby(label_col)[time_col].idxmax()
-        # Preserve original order of labels as they appear in the frame
-        idx = list(idx)
-        return self.__class__(self.loc[idx].copy(), coerce=False, validate=False)
-    
+        if value is None:
+            # Original LAD behavior: one row per label, last in time.
+            if label_col not in self.columns or time_col not in self.columns:
+                return self.__class__(self.copy(), coerce=False, validate=False)
+
+            idx = self.groupby(label_col)[time_col].idxmax()
+            idx = list(idx)  # Preserve original order of labels
+            return self.__class__(self.loc[idx].copy(), coerce=False, validate=False)
+
+        # value-specific path: latest row for the given label.
+        if label_col not in self.columns:
+            raise ValueError(f"Label column {label_col!r} not present in frame.")
+
+        df = self[self[label_col] == value]
+        if df.empty:
+            raise KeyError(f"Label {value!r} not found in {label_col!r}.")
+
+        if time_col is not None and time_col in df.columns:
+            idx = df[time_col].idxmax()
+            row = df.loc[idx]
+        else:
+            # Fall back to last row if no usable time column.
+            row = df.iloc[-1]
+
+        row.__class__ = self.ROW_SERIES_CLASS
+        return row
+
+    def power_table(
+        self,
+        superheader: Optional[str] = None,
+        columns: Optional[List[str]] = None,
+        bypass_styles: bool = False,
+        row_styles: Optional[List[Dict]] = None,
+        cell_styles: Optional[List[List[Dict]]] = None,
+        add_filters: Optional[str] = None,
+        add_sorting: Optional[str] = None,
+        **kwargs,
+    ) -> 'PowerTable':
+        """Produce a rich, interactive HTML table via PowerTable.
+
+        Mirrors ``DataContainer.power_table()``.  Each row is rendered using
+        the associated :class:`TtsRowSeries` subclass, so subclasses can
+        drive per-row and per-cell CSS by overriding
+        :attr:`~TtsRowSeries.default_html_row_style` and
+        :attr:`~TtsRowSeries.default_html_cell_styles`.
+
+        Parameters
+        ----------
+        superheader : str or None
+            Title row spanning the full table width.
+        columns : list[str] or None
+            Columns to include.  Defaults to all columns.
+        bypass_styles : bool
+            When True, all row- and cell-level CSS is suppressed.
+        row_styles : list[dict] or None
+            Explicit CSS for each row.  Must match frame length.
+        cell_styles : list[list[dict]] or None
+            Explicit CSS for each cell in each row.
+        add_filters : str or None
+            Enable column filtering (``'local'``, ``'django'``, or None).
+        add_sorting : str or None
+            Enable column sorting (``'local'``, ``'django'``, or None).
+        **kwargs
+            Passed through to :class:`~tts_html_utils.core.components.table.PowerTable`.
+
+        Returns
+        -------
+        PowerTable
+        """
+        from tts_html_utils.core.components.table import PowerTable
+
+        repr_cols = list(columns) if columns is not None else list(self.columns)
+
+        row_data = []
+        auto_row_styles = []
+        auto_cell_styles = []
+
+        for ii, (idx, row_series) in enumerate(self.iterrows()):
+            row_dict = {col: row_series.get(col) for col in repr_cols}
+            expand_content = self._get_subcontainer_html_components(idx, row_series)
+            row_data.append((row_dict, expand_content))
+
+            base_row_style = {"background-color": "#EEEEEE"} if ii % 2 else {}
+            auto_row_styles.append({**base_row_style, **row_series.default_html_row_style})
+
+            per_cell = row_series.default_html_cell_styles
+            auto_cell_styles.append([per_cell.get(col, {}) for col in repr_cols])
+
+        if bypass_styles:
+            final_row_styles = [{} for _ in row_data]
+            final_cell_styles = [[{} for _ in repr_cols] for _ in row_data]
+        else:
+            if row_styles is not None:
+                if len(row_styles) != len(row_data):
+                    raise ValueError(
+                        f"row_styles length ({len(row_styles)}) must match "
+                        f"the number of rows ({len(row_data)})"
+                    )
+                final_row_styles = row_styles
+            else:
+                final_row_styles = auto_row_styles
+
+            final_cell_styles = cell_styles if cell_styles is not None else auto_cell_styles
+
+        table = PowerTable(
+            column_fields=repr_cols,
+            row_data=row_data,
+            row_styles=final_row_styles,
+            cell_styles=final_cell_styles,
+            add_filters=add_filters,
+            add_sorting=add_sorting,
+            **kwargs
+        )
+        if superheader:
+            table.add_superheader(superheader)
+        table.add_header(column_names=repr_cols)
+        return table
+
+    def _get_subcontainer_html_components(
+        self,
+        idx: object,
+        row_series: 'TtsRowSeries',
+    ) -> Optional[List]:
+        """Return expandable sub-table content for a row, or None.
+
+        Looks up :attr:`SUBCONTAINER_KEY` in ``_subcontainers``, renders
+        any found nested frames via their own ``power_table()`` method, and
+        returns the list of PowerTable component objects (or None when the row
+        has no subcontainers).
+        """
+        key_cfg = self.SUBCONTAINER_KEY
+        subcontainers = getattr(self, "_subcontainers", None) or {}
+        if not key_cfg or not subcontainers:
+            return None
+
+        if key_cfg == "pandas_index":
+            row_key = idx
+        elif isinstance(key_cfg, str):
+            row_key = row_series.get(key_cfg)
+        else:
+            row_key = tuple(row_series.get(c) for c in key_cfg)
+
+        sub = subcontainers.get(row_key, {})
+        if not sub:
+            return None
+
+        subtables = [
+            container.power_table(name)
+            for name, container in sub.items()
+            if hasattr(container, "power_table")
+        ]
+        return subtables if subtables else None
+
+    def _repr_html_(self):
+        """Jupyter/IPython hook: render this frame as a styled PowerTable."""
+        return self.power_table().render()
+
+    def lad_value(self, value, *, label_col=None, time_col=None, value_col=None, as_native=True):
+        """Return the latest value for a given label as a scalar.
+
+        This is a convenience wrapper around :meth:`lad` that:
+
+        - looks up the latest row for the given label ``value``
+        - extracts the column specified by ``value_col`` (default
+          :attr:`VALUE_COL`)
+        - optionally converts 0-d arrays / pandas scalars to native
+          Python types when ``as_native`` is True.
+        """
+        value_col = value_col or self.VALUE_COL
+        row = self.lad(value=value, label_col=label_col, time_col=time_col)
+        scalar = row[value_col]
+
+        if as_native:
+            # Preserve None / NaN / non-scalar objects as-is.
+            try:
+                # pandas and numpy scalars have .item(); normal Python
+                # scalars will raise AttributeError and be returned
+                # unchanged.
+                return scalar.item()  # type: ignore[attr-defined]
+            except AttributeError:
+                return scalar
+        return scalar
