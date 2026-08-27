@@ -301,12 +301,19 @@ class _MathExprError(Exception):
     pass
 
 
+def _poly(*args):
+    # poly(c0, c1, ..., cN, x) -> c0 + c1*x + c2*x**2 + ... + cN*x**N
+    *coeffs, x = args
+    return sum(c * x ** i for i, c in enumerate(coeffs))
+
+
 class _MathTransformer(lark.Transformer):
 
     _FUNCS = {
         'abs': abs, 'sqrt': np.sqrt, 'sin': np.sin, 'cos': np.cos,
         'tan': np.tan, 'log': np.log, 'log10': np.log10, 'exp': np.exp,
         'floor': np.floor, 'ceil': np.ceil,
+        'poly': _poly,
     }
 
     def __init__(self, values):

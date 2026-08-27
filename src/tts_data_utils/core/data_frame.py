@@ -187,7 +187,20 @@ class TtsDataFrame(pd.DataFrame):
 
     # Attributes in this list are copied by pandas when creating new
     # objects via methods like .copy(), .loc, .sort_values(), etc.
-    _metadata = ["name", "metadata", "_subcontainers", "_row_dispositions"]
+    #
+    # NOTE: the container-level identifier is stored as ``_container_name``
+    # (exposed publicly via the ``name`` property below), NOT literally
+    # "name". pandas Series objects declare their own ``_metadata = ["name"]``
+    # and treat ``.name`` as a reserved, hashable-only property. If this
+    # DataFrame's ``_metadata`` also contained the literal string "name",
+    # then any column selection producing a Series (e.g. ``df["name"]`` or
+    # any other column) would have pandas' generic ``__finalize__`` machinery
+    # detect the intersection {"name"} between the two ``_metadata`` lists
+    # and force the container's ``.name`` value onto the resulting Series'
+    # reserved ``.name`` property -- clobbering the column label, and
+    # raising ``TypeError: Series.name must be a hashable type`` whenever
+    # the container's name happens to be non-hashable.
+    _metadata = ["_container_name", "metadata", "_subcontainers", "_row_dispositions"]
 
     # Optional associated row class for ergonomic row views (not used for typing).
     ROW_ITEM_CLS = None
@@ -249,7 +262,7 @@ class TtsDataFrame(pd.DataFrame):
             kwargs = df_kwargs
 
         super().__init__(*args, **kwargs)
-        self.name = name
+        self._container_name = name
         self.metadata = metadata if metadata is not None else {}
         self._data_hash = None
         self._pivot_cache = None
@@ -258,6 +271,20 @@ class TtsDataFrame(pd.DataFrame):
 
         if coerce or validate:
             self._apply_schema(coerce=coerce, validate=validate)
+
+    @property
+    def name(self):
+        """Container-level identifier for this DataFrame (not a column).
+
+        Stored internally as ``_container_name`` to avoid colliding with
+        pandas' own reserved ``Series.name`` semantics during
+        ``_metadata`` propagation. See the comment on ``_metadata`` above.
+        """
+        return self._container_name
+
+    @name.setter
+    def name(self, value):
+        self._container_name = value
 
     def moving_average(self, window_seconds, label_value=None, time_col=None, label_col=None, value_col=None):
         """Return a time-based moving average over ``window_seconds`` seconds.
@@ -1448,7 +1475,7 @@ class TtsDataFrame(pd.DataFrame):
                 "target": target,
             })
 
-        cross_df = pd.DataFrame(crossings)
+        cross_df = pd.DataFrame(crossings, columns=["time", "direction", "label", "target"])
         return self._constructor(cross_df).__finalize__(self)
 
     def _apply_schema(self, coerce: bool, validate: bool) -> None:
