@@ -40,6 +40,41 @@ def simple_frame():
     return MockFrame(data, coerce=False, validate=False)
 
 
+class MockNameColumnFrame(TtsDataFrame):
+    """Frame whose LABEL_COL is literally 'name', matching real-world
+    chanvals-style frames (name/value/scet)."""
+
+    DEFAULT_TIME_LABEL = "scet"
+    LABEL_COL = "name"
+    VALUE_COL = "value"
+    LABEL_COLUMN = "name"
+
+
+@pytest.mark.unreviewed_ai_generated_test
+class TestContainerNameColumnCollision:
+    """Regression test: selecting a column literally called 'name' must
+    not clobber the resulting Series' reserved .name with the
+    DataFrame's container-level .name metadata attribute, and must not
+    raise even when the container name is unhashable."""
+
+    def test_select_name_column_with_unhashable_container_name(self):
+        data = [
+            {"scet": datetime(2020, 1, 1), "value": 1, "name": "chan_a"},
+            {"scet": datetime(2020, 1, 1), "value": 2, "name": "chan_b"},
+        ]
+        df = MockNameColumnFrame(data, name=["not", "hashable"], coerce=False, validate=False)
+
+        # Should not raise TypeError: Series.name must be a hashable type
+        column = df["name"]
+
+        assert list(column) == ["chan_a", "chan_b"]
+        # The Series' own .name should reflect the column label, not the
+        # container's metadata name.
+        assert column.name == "name"
+        # The container-level name metadata should be preserved on df.
+        assert df.name == ["not", "hashable"]
+
+
 @pytest.mark.unreviewed_ai_generated_test
 class TestSchema:
     def test_cast_and_validate(self):
