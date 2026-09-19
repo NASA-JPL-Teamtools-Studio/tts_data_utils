@@ -25,7 +25,8 @@ dependencies = [
     "jpl-time",
     "tabulate",
     "pandas",
-    "tts-utilities>=0.2.1,<1.0.0",
+    # floor set to the first release containing tts_utilities.inspection
+    "tts-utilities>=0.3.3,<1.0.0",
     "tts-html-utils>=0.4.2,<1.0.0"
 ]
 dynamic = ["version"]
