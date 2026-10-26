@@ -1949,6 +1949,8 @@ class TtsDataFrame(pd.DataFrame):
         cell_styles: Optional[List[List[Dict]]] = None,
         add_filters: Optional[str] = None,
         add_sorting: Optional[str] = None,
+        add_pagination: bool = False,
+        page_size: int = 25,
         **kwargs,
     ) -> 'PowerTable':
         """Produce a rich, interactive HTML table via PowerTable.
@@ -1975,6 +1977,10 @@ class TtsDataFrame(pd.DataFrame):
             Enable column filtering (``'local'``, ``'django'``, or None).
         add_sorting : str or None
             Enable column sorting (``'local'``, ``'django'``, or None).
+        add_pagination : bool
+            Enable local pagination controls.
+        page_size : int
+            Number of rows shown per page when pagination is enabled. Defaults to 25.
         **kwargs
             Passed through to :class:`~tts_html_utils.core.components.table.PowerTable`.
 
@@ -2024,6 +2030,8 @@ class TtsDataFrame(pd.DataFrame):
             cell_styles=final_cell_styles,
             add_filters=add_filters,
             add_sorting=add_sorting,
+            add_pagination=add_pagination,
+            page_size=page_size,
             **kwargs
         )
         if superheader:
