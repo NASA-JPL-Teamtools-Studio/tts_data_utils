@@ -144,6 +144,11 @@ class TestPowerTableMethod:
         pt = simple_frame.power_table(columns=["label", "value"])
         assert pt.col_fields == ["label", "value"]
 
+    def test_pagination_options_are_explicit(self, simple_frame):
+        pt = simple_frame.power_table(add_pagination=True, page_size=50)
+        assert pt.pagination is True
+        assert pt.page_size == 50
+
     def test_superheader_appears_in_render(self, simple_frame):
         pt = simple_frame.power_table(superheader="My Table Title")
         html = pt.render()
