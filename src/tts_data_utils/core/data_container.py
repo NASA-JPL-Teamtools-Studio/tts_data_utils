@@ -827,16 +827,18 @@ class DataContainer(ABC):
                             assigned_r.add(r)
 
                     for l, r in final_matches.items():
-                        l['_visdiff_match'] = 'replace'
+                        mismatched_keys = [k for k in l.values.keys() if not k.startswith('_') and l[k] != r[k]]
+                        match = 'replace' if mismatched_keys else 'equal'
+                        l['_visdiff_match'] = match
                         # this shouldn't be none, but the way I've done this the code doesn't
                         # have the index at this moment.
                         l['_visdiff_index'] = right._get_index_from_hash(hash(r)) 
-                        l['_mismatched_keys'] = [k for k in l.values.keys() if l[k] != r[k]]
-                        r['_visdiff_match'] = 'replace'
+                        l['_mismatched_keys'] = mismatched_keys
+                        r['_visdiff_match'] = match
                         # this shouldn't be none, but the way I've done this the code doesn't
                         # have the index at this moment.
                         r['_visdiff_index'] = left._get_index_from_hash(hash(l))  
-                        r['_mismatched_keys'] = [k for k in l.values.keys() if l[k] != r[k]]
+                        r['_mismatched_keys'] = mismatched_keys
 
                 else:
                     for i, j in zip(range(i1, i2), range(j1, j2)):
@@ -851,9 +853,10 @@ class DataContainer(ABC):
                             left[i]['_mismatched_keys'] = []
                             right[j]['_mismatched_keys'] = []
                         else:
-                            left[i]['_visdiff_match'] = 'replace'
-                            right[j]['_visdiff_match'] = 'replace'
-                            mismatched_keys = [k for k in left[i].values.keys() if left[i][k] != right[j][k]]
+                            mismatched_keys = [k for k in left[i].values.keys() if not k.startswith('_') and left[i][k] != right[j][k]]
+                            match = 'replace' if mismatched_keys else 'equal'
+                            left[i]['_visdiff_match'] = match
+                            right[j]['_visdiff_match'] = match
 
                             left[i]['_visdiff_index'] = j
                             right[j]['_visdiff_index'] = i
