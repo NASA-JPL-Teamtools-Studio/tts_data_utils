@@ -757,39 +757,40 @@ class DataContainer(ABC):
         left = self._copy()
         right = right._copy()
 
-        # Generate row signatures
-        aa = [{k: v for k, v in r.values.items() if k not in ignore_cols} for r in left.records]
-        bb = [{k: v for k, v in r.values.items() if k not in ignore_cols} for r in right.records]
-
-        for a, b in zip(aa, bb):
+        def drifted_keys(a, b):
+            keys = []
             for k, v in tolerance.items():
-                match = False
                 if isinstance(a[k], datetime) and isinstance(b[k], datetime):
-                    match = abs((a[k] - b[k]).total_seconds()) < v
+                    within = abs((a[k] - b[k]).total_seconds()) < v
                 elif isinstance(a[k], datetime) or isinstance(b[k], datetime):
                     raise Exception(f'Compared values for "{k}" must either both be datetimes or both not be datetimes. Got "{type(a[k]).__name__}" and "{type(b[k]).__name__}"')
                 else:
                     try:
-                        match = abs(a[k] - b[k]) < v
+                        within = abs(a[k] - b[k]) < v
                     except TypeError:
                         raise Exception(f'Compared values for "{k}" must both be numbers or both datetimes. Got "{type(a[k]).__name__} "and "{type(b[k]).__name__}"')
-                a[k] = match
-                b[k] = match
+                if not within: keys.append(k)
+            return keys
 
-        aa = [tuple(sorted((k, v) for k, v in a.items())) for a in aa]
-        bb = [tuple(sorted((k, v) for k, v in b.items())) for b in bb]
+        # Tolerance columns are excluded from row identity so drifting rows can still
+        # line up. Drift is checked per aligned pair below, never by row position.
+        skip = set(ignore_cols) | set(tolerance)
+        aa = [tuple(sorted((k, v) for k, v in r.values.items() if k not in skip)) for r in left.records]
+        bb = [tuple(sorted((k, v) for k, v in r.values.items() if k not in skip)) for r in right.records]
         sm = SequenceMatcher(None, aa, bb)
         # Iterate over opcodes to assign row status
         for tag, i1, i2, j1, j2 in sm.get_opcodes():
             if tag == 'equal':
-                # Rows are the same in both, mark as equal
+                # Rows match on all non-tolerance columns; within-tolerance drift still counts as equal
                 for i, j in zip(range(i1, i2), range(j1, j2)):
-                    left[i]['_visdiff_match'] = 'equal'
+                    keys = drifted_keys(left[i].values, right[j].values) if tolerance else []
+                    status = 'replace' if keys else 'equal'
+                    left[i]['_visdiff_match'] = status
                     left[i]['_visdiff_index'] = j
-                    right[j]['_visdiff_match'] = 'equal'
+                    right[j]['_visdiff_match'] = status
                     right[j]['_visdiff_index'] = i
-                    left[i]['_mismatched_keys'] = []
-                    right[j]['_mismatched_keys'] = []
+                    left[i]['_mismatched_keys'] = keys
+                    right[j]['_mismatched_keys'] = keys
 
             elif tag == 'replace':
                 # Who hurt you?
