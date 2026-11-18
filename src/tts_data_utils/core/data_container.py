@@ -897,40 +897,46 @@ class DataContainer(ABC):
         ii = 0
         jj = 0
 
-        while max(ii, jj) < longer_table_len:
-            try:
-                l = left[ii]
-                r = right[jj]
-            except:
-                pdb.set_trace()
-            empty_left_record = self.DATA_ITEM_CLS(source=r.values)
-            empty_left_record['_mismatched_keys'] = []
-            empty_left_record['_visdiff_match'] = 'empty_from_insert'
+        while ii < len(left) or jj < len(right):
+            l = left[ii] if ii < len(left) else None
+            r = right[jj] if jj < len(right) else None
+            l_free = l is not None and l['_visdiff_index'] is None
+            r_free = r is not None and r['_visdiff_index'] is None
 
-            empty_right_record = self.DATA_ITEM_CLS(source=l.values)
-            empty_right_record['_mismatched_keys'] = []
-            empty_right_record['_visdiff_match'] = 'empty_from_delete'
-
-            if l['_visdiff_index'] is None and r['_visdiff_index'] is None:
+            if l_free and r_free:
+                empty_left_record = self.DATA_ITEM_CLS(source=r.values)
+                empty_left_record['_mismatched_keys'] = []
+                empty_left_record['_visdiff_match'] = 'empty_from_insert'
+                empty_right_record = self.DATA_ITEM_CLS(source=l.values)
+                empty_right_record['_mismatched_keys'] = []
+                empty_right_record['_visdiff_match'] = 'empty_from_delete'
                 new_right.append(empty_right_record)
                 new_right.append(r)
                 new_left.append(l)
                 new_left.append(empty_left_record)
                 ii += 1
                 jj += 1
-            elif l['_visdiff_index'] is None:
+            elif l_free:
+                empty_right_record = self.DATA_ITEM_CLS(source=l.values)
+                empty_right_record['_mismatched_keys'] = []
+                empty_right_record['_visdiff_match'] = 'empty_from_delete'
                 new_left.append(l)
                 new_right.append(empty_right_record)
                 ii += 1
-            elif r['_visdiff_index'] is None:
+            elif r_free:
+                empty_left_record = self.DATA_ITEM_CLS(source=r.values)
+                empty_left_record['_mismatched_keys'] = []
+                empty_left_record['_visdiff_match'] = 'empty_from_insert'
                 new_left.append(empty_left_record)
                 new_right.append(r)
+                jj += 1
+            elif l is not None and r is not None:
+                new_left.append(l)
+                new_right.append(r)
+                ii += 1
                 jj += 1
             else:
-                new_left.append(l)
-                new_right.append(r)
-                ii += 1
-                jj += 1
+                raise ValueError('visual_diff alignment is not monotone; cannot merge the two row lists')
 
         left = new_left
         right = new_right
@@ -941,11 +947,7 @@ class DataContainer(ABC):
         left = self._de_interlace_diffs(['delete', 'empty_from_insert'], left, False)
         # pdb.set_trace()
 
-        try:
-            visdiff_left, visdiff_right = VisualDiffContainer(raw_data=[r.values for r in left.records]), VisualDiffContainer(raw_data=[r.values for r in right.records])
-        except:
-            pdb.set_trace()
-
+        visdiff_left, visdiff_right = VisualDiffContainer(raw_data=[r.values for r in left.records]), VisualDiffContainer(raw_data=[r.values for r in right.records])
         return visdiff_left, visdiff_right
 
     def _de_interlace_diffs(self, target_values, container, empties_first=True):
