@@ -222,3 +222,17 @@ def test_tolerance_drift_keeps_later_rows_aligned():
 
     assert [r['_visdiff_match'] for r in visdiff_left.records] == ['empty_from_insert', 'equal', 'equal']
     assert [r['_visdiff_match'] for r in visdiff_right.records] == ['insert', 'equal', 'equal']
+
+
+def test_visual_diff_handles_unequal_lengths():
+    t0 = datetime(2014, 11, 6, 0, 0, 0)
+    a = {'Time': t0, 'Stem': 'a'}
+    b = {'Time': datetime(2014, 11, 6, 0, 0, 10), 'Stem': 'b'}
+
+    longer_right = GenericContainer(raw_data=[a]).visual_diff(GenericContainer(raw_data=[a, b]))
+    assert [r['_visdiff_match'] for r in longer_right[0].records] == ['equal', 'empty_from_insert']
+    assert [r['_visdiff_match'] for r in longer_right[1].records] == ['equal', 'insert']
+
+    longer_left = GenericContainer(raw_data=[a, b]).visual_diff(GenericContainer(raw_data=[a]))
+    assert [r['_visdiff_match'] for r in longer_left[0].records] == ['equal', 'delete']
+    assert [r['_visdiff_match'] for r in longer_left[1].records] == ['equal', 'empty_from_delete']
