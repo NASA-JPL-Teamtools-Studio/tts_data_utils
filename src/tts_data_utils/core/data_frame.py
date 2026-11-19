@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import json
 from datetime import datetime
+from functools import partial
 from typing import Optional, Dict, List
 from tts_dante.interpolators.interpolators import StepInterpolator, LinearInterpolator
 from tts_data_utils.core.expr_engines import (
@@ -10,6 +11,8 @@ from tts_data_utils.core.expr_engines import (
     _MathExprError, _math_engine, _MathTransformer,
 )
 from tts_utilities.logger import create_logger
+
+_VECTORIZE_DERIVATIONS = True
 
 try:
     from tts_dexter.core.row_mixin import DexterRowMixin
@@ -1159,6 +1162,63 @@ class TtsDataFrame(pd.DataFrame):
         """
         return {}
 
+    def _derivation_rows(self, parsed, aligned, derived_names, multi_output, index_col, label_col, value_col):
+        if _VECTORIZE_DERIVATIONS and aligned:
+            try:
+                return self._vectorized_derivation_rows(
+                    parsed, aligned, derived_names, multi_output, index_col, label_col, value_col
+                )
+            except Exception:
+                pass
+
+        rows = []
+        for t, slot in aligned:
+            result = parsed.eval(slot, context=partial(self.get_derivation_context, t, slot))
+
+            if multi_output:
+                try:
+                    values = list(result)
+                except TypeError as exc:
+                    raise _MathExprError(
+                        "derive_values: multi-target assignment requires the "
+                        "expression to return an iterable of values."
+                    ) from exc
+
+                if len(values) != len(derived_names):
+                    raise _MathExprError(
+                        f"derive_values: expression returned {len(values)} values "
+                        f"but {len(derived_names)} target names were given."
+                    )
+
+                for name, val in zip(derived_names, values):
+                    rows.append({index_col: t, label_col: name, value_col: val})
+            else:
+                rows.append({index_col: t, label_col: derived_names[0], value_col: result})
+        return rows
+
+    def _vectorized_derivation_rows(self, parsed, aligned, derived_names, multi_output, index_col, label_col, value_col):
+        if not all(isinstance(v, float) for _, slot in aligned for v in slot.values()):
+            raise ValueError("vectorized derivation requires float inputs")
+        times = [t for t, _ in aligned]
+        n = len(times)
+        columns = {lbl: np.array([slot[lbl] for _, slot in aligned], dtype=float) for lbl in parsed.labels}
+        result = parsed.eval_vectorized(columns)
+
+        if multi_output:
+            if not isinstance(result, list) or len(result) != len(derived_names):
+                raise ValueError("vectorized derivation requires one output per target")
+            outputs = [np.broadcast_to(np.asarray(v), (n,)).tolist() for v in result]
+            return [
+                {index_col: t, label_col: name, value_col: out[i]}
+                for i, t in enumerate(times)
+                for name, out in zip(derived_names, outputs)
+            ]
+
+        if isinstance(result, list):
+            raise ValueError("vectorized derivation requires a scalar-valued expression")
+        values = np.broadcast_to(np.asarray(result), (n,)).tolist()
+        return [{index_col: t, label_col: derived_names[0], value_col: v} for t, v in zip(times, values)]
+
     def derive_values(
         self,
         expr: str,
@@ -1247,12 +1307,12 @@ class TtsDataFrame(pd.DataFrame):
             grp = grouped.get_group(lbl).sort_values(index_col)
             label_data[lbl] = (grp[index_col].tolist(), grp[value_col].tolist())
 
-        rows = []
         label_interpolators = {
             lbl: interpolator if interpolator is not None else self.get_interpolator(lbl)
             for lbl in parsed.labels
         }
 
+        aligned = []
         if timeout == 0: 
             # Speeds up derivation when timeout is zero by not even calling the Interpolator.
             # Should be equivalent to setting interplator timeout to zero (e.g. do not interpolate.
@@ -1265,28 +1325,7 @@ class TtsDataFrame(pd.DataFrame):
                 for lbl, (times, vals) in label_data.items()
             }
             for t in common_times:
-                slot = {lbl: lookup[lbl][t] for lbl in parsed.labels}
-                result = parsed.eval(slot, context=self.get_derivation_context(t, slot))
-
-                if multi_output:
-                    try:
-                        values = list(result)
-                    except TypeError as exc:
-                        raise _MathExprError(
-                            "derive_values: multi-target assignment requires the "
-                            "expression to return an iterable of values."
-                        ) from exc
-
-                    if len(values) != len(derived_names):
-                        raise _MathExprError(
-                            f"derive_values: expression returned {len(values)} values "
-                            f"but {len(derived_names)} target names were given."
-                        )
-
-                    for name, val in zip(derived_names, values):
-                        rows.append({index_col: t, label_col: name, value_col: val})
-                else:
-                    rows.append({index_col: t, label_col: derived_names[0], value_col: result})
+                aligned.append((t, {lbl: lookup[lbl][t] for lbl in parsed.labels}))
         else:
             all_times = sorted({t for times, _ in label_data.values() for t in times})
             for t in all_times:
@@ -1298,29 +1337,12 @@ class TtsDataFrame(pd.DataFrame):
                         valid = False
                         break
                     slot[lbl] = v
-                if not valid:
-                    continue
-                result = parsed.eval(slot, context=self.get_derivation_context(t, slot))
+                if valid:
+                    aligned.append((t, slot))
 
-                if multi_output:
-                    try:
-                        values = list(result)
-                    except TypeError as exc:
-                        raise _MathExprError(
-                            "derive_values: multi-target assignment requires the "
-                            "expression to return an iterable of values."
-                        ) from exc
-
-                    if len(values) != len(derived_names):
-                        raise _MathExprError(
-                            f"derive_values: expression returned {len(values)} values "
-                            f"but {len(derived_names)} target names were given."
-                        )
-
-                    for name, val in zip(derived_names, values):
-                        rows.append({index_col: t, label_col: name, value_col: val})
-                else:
-                    rows.append({index_col: t, label_col: derived_names[0], value_col: result})
+        rows = self._derivation_rows(
+            parsed, aligned, derived_names, multi_output, index_col, label_col, value_col
+        )
 
         if not rows:
             if append:
