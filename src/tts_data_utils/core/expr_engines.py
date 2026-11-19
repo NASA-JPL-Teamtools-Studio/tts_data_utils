@@ -316,9 +316,10 @@ class _MathTransformer(lark.Transformer):
         'poly': _poly,
     }
 
-    def __init__(self, values):
+    def __init__(self, values, context=None):
         super().__init__()
         self._values = values
+        self._context = context or {}
 
     @lark.v_args(inline=True)
     def int_val(self, tok):
@@ -456,9 +457,9 @@ class _ParsedMath:
             if subtree.data == 'column'
         ))
 
-    def eval(self, values):
+    def eval(self, values, context=None):
         try:
-            return self._transformer_cls(values).transform(self._tree)
+            return self._transformer_cls(values, context=context).transform(self._tree)
         except lark.exceptions.VisitError as e:
             raise e.orig_exc
 
