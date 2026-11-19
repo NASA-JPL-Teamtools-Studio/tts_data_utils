@@ -1151,6 +1151,14 @@ class TtsDataFrame(pd.DataFrame):
         """
         return StepInterpolator()
 
+    def get_derivation_context(self, timestamp, values):
+        """Return non-expression context available to math functions.
+
+        Subclasses can override this to expose aligned metadata such as the
+        timestamp or auxiliary telemetry needed by domain-specific functions.
+        """
+        return {}
+
     def derive_values(
         self,
         expr: str,
@@ -1258,7 +1266,7 @@ class TtsDataFrame(pd.DataFrame):
             }
             for t in common_times:
                 slot = {lbl: lookup[lbl][t] for lbl in parsed.labels}
-                result = parsed.eval(slot)
+                result = parsed.eval(slot, context=self.get_derivation_context(t, slot))
 
                 if multi_output:
                     try:
@@ -1292,7 +1300,7 @@ class TtsDataFrame(pd.DataFrame):
                     slot[lbl] = v
                 if not valid:
                     continue
-                result = parsed.eval(slot)
+                result = parsed.eval(slot, context=self.get_derivation_context(t, slot))
 
                 if multi_output:
                     try:
