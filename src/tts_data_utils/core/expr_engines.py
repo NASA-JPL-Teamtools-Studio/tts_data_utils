@@ -477,9 +477,14 @@ def _require_numeric(*xs):
         raise _NotVectorizable('arithmetic on booleans')
 
 
+def _kind(x):
+    kind = np.asarray(x).dtype.kind
+    return 'i' if kind == 'u' else kind
+
+
 def _require_same_kind(l, r):
-    if _is_bool(l) != _is_bool(r):
-        raise _NotVectorizable('and/or mixing booleans and numbers')
+    if _kind(l) != _kind(r):
+        raise _NotVectorizable('and/or mixing value kinds')
 
 
 class _VectorOps:

@@ -55,6 +55,8 @@ _PARITY_EXPRS = [
     "d = -(a > 1)",
     "d = (a > 1) + 1",
     "d = a > 1 and b > 2",
+    "d = a and 2",
+    "d = a > 1 or 0",
 ]
 
 
