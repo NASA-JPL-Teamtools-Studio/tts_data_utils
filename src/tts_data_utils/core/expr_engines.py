@@ -319,7 +319,13 @@ class _MathTransformer(lark.Transformer):
     def __init__(self, values, context=None):
         super().__init__()
         self._values = values
-        self._context = context or {}
+        self._context_source = context
+
+    @property
+    def _context(self):
+        if callable(self._context_source):
+            self._context_source = self._context_source()
+        return self._context_source or {}
 
     @lark.v_args(inline=True)
     def int_val(self, tok):
@@ -446,11 +452,88 @@ class _MathTransformer(lark.Transformer):
         return not v
 
 
+class _NotVectorizable(Exception):
+    pass
+
+
+_VECTOR_FUNCS = frozenset({'abs', 'sqrt', 'sin', 'cos', 'tan', 'log', 'log10', 'exp', 'floor', 'ceil', 'poly'})
+
+
+class _VectorOps:
+    """Elementwise overrides for evaluating an expression over whole columns.
+
+    Each override matches the scalar transformer's result on float inputs, or
+    raises _NotVectorizable where NumPy and Python semantics could differ, so
+    the caller falls back to the scalar path and gets the scalar result or error.
+    """
+
+    def __init__(self, values, context=None):
+        super().__init__(values, context=context)
+
+    @lark.v_args(inline=True)
+    def string_val(self, tok):
+        raise _NotVectorizable('string literal')
+
+    @lark.v_args(inline=True)
+    def func_call(self, name_tok, *args):
+        fname = str(name_tok)
+        if fname not in _VECTOR_FUNCS or self._FUNCS.get(fname) is not _MathTransformer._FUNCS[fname]:
+            raise _NotVectorizable(fname)
+        try:
+            return self._FUNCS[fname](*args)
+        except Exception as e:
+            raise _MathExprError(f"Error in function {fname!r}: {e}") from e
+
+    @lark.v_args(inline=True)
+    def div(self, l, r):
+        if np.any(np.asarray(r) == 0):
+            raise _NotVectorizable('division by zero')
+        return l / r
+
+    @lark.v_args(inline=True)
+    def floordiv(self, l, r):
+        if np.any(np.asarray(r) == 0):
+            raise _NotVectorizable('floor division by zero')
+        return l // r
+
+    @lark.v_args(inline=True)
+    def pow_(self, base, exp):
+        b, e = np.asarray(base), np.asarray(exp)
+        if np.any((b == 0) & (e < 0)) or np.any((b < 0) & (e != np.floor(e))):
+            raise _NotVectorizable('power outside real domain')
+        out = b ** e
+        if np.any(np.isinf(out) & np.isfinite(b) & np.isfinite(e)):
+            raise _NotVectorizable('power overflow')
+        return out
+
+    @lark.v_args(inline=True)
+    def in_(self, *children):
+        l, r = children[0], children[-1]
+        if not isinstance(r, list) or any(np.ndim(x) for x in r):
+            raise _NotVectorizable('membership in non-scalar list')
+        return np.isin(np.asarray(l), np.asarray(r))
+
+    @lark.v_args(inline=True)
+    def and_(self, *children):
+        l, r = children[0], children[-1]
+        return np.where(np.asarray(l) != 0, r, l)
+
+    @lark.v_args(inline=True)
+    def or_(self, *children):
+        l, r = children[0], children[-1]
+        return np.where(np.asarray(l) != 0, l, r)
+
+    @lark.v_args(inline=True)
+    def not_(self, *children):
+        return np.logical_not(np.asarray(children[-1]) != 0)
+
+
 class _ParsedMath:
 
     def __init__(self, tree, transformer_cls):
         self._tree = tree
         self._transformer_cls = transformer_cls
+        self._vector_cls = type(f'Vectorized{transformer_cls.__name__}', (_VectorOps, transformer_cls), {})
         self.labels = list(dict.fromkeys(
             str(subtree.children[0])
             for subtree in tree.iter_subtrees()
@@ -460,6 +543,12 @@ class _ParsedMath:
     def eval(self, values, context=None):
         try:
             return self._transformer_cls(values, context=context).transform(self._tree)
+        except lark.exceptions.VisitError as e:
+            raise e.orig_exc
+
+    def eval_vectorized(self, columns):
+        try:
+            return self._vector_cls(columns).transform(self._tree)
         except lark.exceptions.VisitError as e:
             raise e.orig_exc
 
