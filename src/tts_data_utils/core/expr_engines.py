@@ -301,6 +301,9 @@ class _MathExprError(Exception):
     pass
 
 
+_ELEMENTWISE_FUNC_NAMES = frozenset({'abs', 'sqrt', 'sin', 'cos', 'tan', 'log', 'log10', 'exp', 'floor', 'ceil', 'poly'})
+
+
 def _poly(*args):
     # poly(c0, c1, ..., cN, x) -> c0 + c1*x + c2*x**2 + ... + cN*x**N
     *coeffs, x = args
@@ -314,6 +317,13 @@ class _MathTransformer(lark.Transformer):
         'tan': np.tan, 'log': np.log, 'log10': np.log10, 'exp': np.exp,
         'floor': np.floor, 'ceil': np.ceil,
         'poly': _poly,
+    }
+
+    # name -> (scalar function, vector function). Vector dispatch only happens
+    # while the transformer still maps the name to the registered scalar.
+    _VECTOR_IMPL = {
+        name: (fn, fn) for name, fn in _FUNCS.items()
+        if name in _ELEMENTWISE_FUNC_NAMES
     }
 
     def __init__(self, values, context=None):
@@ -456,7 +466,6 @@ class _NotVectorizable(Exception):
     pass
 
 
-_VECTOR_FUNCS = frozenset({'abs', 'sqrt', 'sin', 'cos', 'tan', 'log', 'log10', 'exp', 'floor', 'ceil', 'poly'})
 
 
 def _is_bool(x):
@@ -491,12 +500,10 @@ class _VectorOps:
     @lark.v_args(inline=True)
     def func_call(self, name_tok, *args):
         fname = str(name_tok)
-        if fname not in _VECTOR_FUNCS or self._FUNCS.get(fname) is not _MathTransformer._FUNCS[fname]:
+        impl = self._VECTOR_IMPL.get(fname)
+        if impl is None or self._FUNCS.get(fname) is not impl[0]:
             raise _NotVectorizable(fname)
-        try:
-            return self._FUNCS[fname](*args)
-        except Exception as e:
-            raise _MathExprError(f"Error in function {fname!r}: {e}") from e
+        return impl[1](*args)
 
     @lark.v_args(inline=True)
     def add(self, l, r):
