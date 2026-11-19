@@ -48,6 +48,13 @@ _PARITY_EXPRS = [
     "d = a in [1.0, 3.0]",
     "d = a in [1, 3] and b > 2",
     "d = 2 * exp(a / 10)",
+    "d = a > 1 and b",
+    "d = a > 1 or b",
+    "d = a and b",
+    "d = (a > 1) * (b > 2)",
+    "d = -(a > 1)",
+    "d = (a > 1) + 1",
+    "d = a > 1 and b > 2",
 ]
 
 

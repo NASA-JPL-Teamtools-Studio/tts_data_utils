@@ -459,6 +459,20 @@ class _NotVectorizable(Exception):
 _VECTOR_FUNCS = frozenset({'abs', 'sqrt', 'sin', 'cos', 'tan', 'log', 'log10', 'exp', 'floor', 'ceil', 'poly'})
 
 
+def _is_bool(x):
+    return np.asarray(x).dtype == bool
+
+
+def _require_numeric(*xs):
+    if any(_is_bool(x) for x in xs):
+        raise _NotVectorizable('arithmetic on booleans')
+
+
+def _require_same_kind(l, r):
+    if _is_bool(l) != _is_bool(r):
+        raise _NotVectorizable('and/or mixing booleans and numbers')
+
+
 class _VectorOps:
     """Elementwise overrides for evaluating an expression over whole columns.
 
@@ -485,19 +499,42 @@ class _VectorOps:
             raise _MathExprError(f"Error in function {fname!r}: {e}") from e
 
     @lark.v_args(inline=True)
+    def add(self, l, r):
+        _require_numeric(l, r)
+        return l + r
+
+    @lark.v_args(inline=True)
+    def sub(self, l, r):
+        _require_numeric(l, r)
+        return l - r
+
+    @lark.v_args(inline=True)
+    def mul(self, l, r):
+        _require_numeric(l, r)
+        return l * r
+
+    @lark.v_args(inline=True)
+    def neg(self, val):
+        _require_numeric(val)
+        return -val
+
+    @lark.v_args(inline=True)
     def div(self, l, r):
+        _require_numeric(l, r)
         if np.any(np.asarray(r) == 0):
             raise _NotVectorizable('division by zero')
         return l / r
 
     @lark.v_args(inline=True)
     def floordiv(self, l, r):
+        _require_numeric(l, r)
         if np.any(np.asarray(r) == 0):
             raise _NotVectorizable('floor division by zero')
         return l // r
 
     @lark.v_args(inline=True)
     def pow_(self, base, exp):
+        _require_numeric(base, exp)
         b, e = np.asarray(base), np.asarray(exp)
         if np.any((b == 0) & (e < 0)) or np.any((b < 0) & (e != np.floor(e))):
             raise _NotVectorizable('power outside real domain')
@@ -516,11 +553,13 @@ class _VectorOps:
     @lark.v_args(inline=True)
     def and_(self, *children):
         l, r = children[0], children[-1]
+        _require_same_kind(l, r)
         return np.where(np.asarray(l) != 0, r, l)
 
     @lark.v_args(inline=True)
     def or_(self, *children):
         l, r = children[0], children[-1]
+        _require_same_kind(l, r)
         return np.where(np.asarray(l) != 0, l, r)
 
     @lark.v_args(inline=True)
