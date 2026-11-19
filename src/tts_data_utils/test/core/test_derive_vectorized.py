@@ -55,6 +55,8 @@ _PARITY_EXPRS = [
     "d = -(a > 1)",
     "d = (a > 1) + 1",
     "d = a > 1 and b > 2",
+    "d = a and 2",
+    "d = a > 1 or 0",
 ]
 
 
@@ -142,3 +144,51 @@ def test_multi_target_assignment_matches_scalar(monkeypatch):
     assert not isinstance(ref, Exception)
     pd.testing.assert_frame_equal(vec, ref, check_exact=False, rtol=1e-12, atol=0)
     assert set(vec["label"]) == {"x", "y"}
+
+
+def _counting_twice(counter):
+    def scalar(x):
+        counter.append(x)
+        return x * 2
+
+    return scalar
+
+
+@pytest.mark.unreviewed_ai_generated_test
+def test_registered_vector_impl_runs_once_per_expression(monkeypatch):
+    counter = []
+    scalar = _counting_twice(counter)
+
+    class _RegisteredTransformer(_MathTransformer):
+        _FUNCS = {**_MathTransformer._FUNCS, "twice": scalar}
+        _VECTOR_IMPL = {**_MathTransformer._VECTOR_IMPL, "twice": (scalar, lambda x: x * 2)}
+
+    class _RegisteredFrame(TtsDataFrame):
+        MATH_TRANSFORMER = _RegisteredTransformer
+
+    frame = _frame(cls=_RegisteredFrame)
+    out = _run(frame, "d = twice(a)", 0, True, monkeypatch)
+
+    assert not isinstance(out, Exception)
+    assert len(counter) == 0
+    assert out[out["label"] == "d"]["value"].tolist() == [2.0, 4.0, 6.0, 8.0, 10.0, 12.0]
+
+
+@pytest.mark.unreviewed_ai_generated_test
+def test_overridden_function_falls_back_to_scalar(monkeypatch):
+    counter = []
+    scalar = _counting_twice(counter)
+
+    class _OverriddenTransformer(_MathTransformer):
+        _FUNCS = {**_MathTransformer._FUNCS, "twice": scalar}
+        _VECTOR_IMPL = {**_MathTransformer._VECTOR_IMPL, "twice": (lambda x: x, lambda x: x)}
+
+    class _OverriddenFrame(TtsDataFrame):
+        MATH_TRANSFORMER = _OverriddenTransformer
+
+    frame = _frame(cls=_OverriddenFrame)
+    out = _run(frame, "d = twice(a)", 0, True, monkeypatch)
+
+    assert not isinstance(out, Exception)
+    assert len(counter) == 6
+    assert out[out["label"] == "d"]["value"].tolist() == [2.0, 4.0, 6.0, 8.0, 10.0, 12.0]
