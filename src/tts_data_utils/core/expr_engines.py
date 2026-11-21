@@ -482,6 +482,14 @@ def _kind(x):
     return 'i' if kind == 'u' else kind
 
 
+def _guard_int_overflow(result, *operands):
+    if any(np.asarray(x).dtype.kind in 'iu' for x in operands):
+        magnitude = np.abs(np.asarray(result, dtype=float))
+        if magnitude.size and np.nanmax(magnitude) >= 2.0 ** 62:
+            raise _NotVectorizable('integer result may overflow int64')
+    return result
+
+
 def _require_same_kind(l, r):
     if _kind(l) != _kind(r):
         raise _NotVectorizable('and/or mixing value kinds')
@@ -513,17 +521,17 @@ class _VectorOps:
     @lark.v_args(inline=True)
     def add(self, l, r):
         _require_numeric(l, r)
-        return l + r
+        return _guard_int_overflow(l + r, l, r)
 
     @lark.v_args(inline=True)
     def sub(self, l, r):
         _require_numeric(l, r)
-        return l - r
+        return _guard_int_overflow(l - r, l, r)
 
     @lark.v_args(inline=True)
     def mul(self, l, r):
         _require_numeric(l, r)
-        return l * r
+        return _guard_int_overflow(l * r, l, r)
 
     @lark.v_args(inline=True)
     def neg(self, val):
@@ -542,7 +550,7 @@ class _VectorOps:
         _require_numeric(l, r)
         if np.any(np.asarray(r) == 0):
             raise _NotVectorizable('floor division by zero')
-        return l // r
+        return _guard_int_overflow(l // r, l, r)
 
     @lark.v_args(inline=True)
     def pow_(self, base, exp):
@@ -553,7 +561,7 @@ class _VectorOps:
         out = b ** e
         if np.any(np.isinf(out) & np.isfinite(b) & np.isfinite(e)):
             raise _NotVectorizable('power overflow')
-        return out
+        return _guard_int_overflow(out, base, exp)
 
     @lark.v_args(inline=True)
     def in_(self, *children):

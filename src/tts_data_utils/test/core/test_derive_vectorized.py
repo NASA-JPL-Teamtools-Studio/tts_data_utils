@@ -192,3 +192,29 @@ def test_overridden_function_falls_back_to_scalar(monkeypatch):
     assert not isinstance(out, Exception)
     assert len(counter) == 6
     assert out[out["label"] == "d"]["value"].tolist() == [2.0, 4.0, 6.0, 8.0, 10.0, 12.0]
+
+
+_INT_PARITY_EXPRS = [
+    "d = a * 2 - abs(b)",
+    "d = a // 2",
+    "d = a / b",
+    "d = a + b * 3",
+    "d = a > b",
+    "d = -a",
+    "d = a ** 2",
+    "d = a * a * a * a * a * a * a",
+]
+
+
+@pytest.mark.unreviewed_ai_generated_test
+@pytest.mark.parametrize("timeout", [0, timedelta(seconds=5)])
+@pytest.mark.parametrize("expr", _INT_PARITY_EXPRS)
+def test_integer_inputs_match_scalar_including_dtype(expr, timeout, monkeypatch):
+    frame = _frame(int_values=True)
+    vec = _run(frame, expr, timeout, True, monkeypatch)
+    ref = _run(frame, expr, timeout, False, monkeypatch)
+
+    if isinstance(ref, Exception):
+        assert type(vec) is type(ref)
+        return
+    pd.testing.assert_frame_equal(vec, ref, check_exact=False, rtol=1e-12, atol=0)

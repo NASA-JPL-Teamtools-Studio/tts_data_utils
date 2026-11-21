@@ -180,6 +180,14 @@ class _SeriesWrappingIndexer:
         )
 
 
+def _input_column(values):
+    if all(type(v) is float for v in values):
+        return np.array(values, dtype=float)
+    if all(type(v) is int and abs(v) < 2 ** 53 for v in values):
+        return np.array(values, dtype=np.int64)
+    raise ValueError("vectorized derivation requires float or exactly-representable int inputs")
+
+
 class TtsDataFrame(pd.DataFrame):
     """Base DataFrame subclass for tts_data_utils.
 
@@ -1197,11 +1205,9 @@ class TtsDataFrame(pd.DataFrame):
         return rows
 
     def _vectorized_derivation_rows(self, parsed, aligned, derived_names, multi_output, index_col, label_col, value_col):
-        if not all(isinstance(v, float) for _, slot in aligned for v in slot.values()):
-            raise ValueError("vectorized derivation requires float inputs")
         times = [t for t, _ in aligned]
         n = len(times)
-        columns = {lbl: np.array([slot[lbl] for _, slot in aligned], dtype=float) for lbl in parsed.labels}
+        columns = {lbl: _input_column([slot[lbl] for _, slot in aligned]) for lbl in parsed.labels}
         result = parsed.eval_vectorized(columns)
 
         if multi_output:
